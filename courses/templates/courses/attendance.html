@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Attendance - {{ course.title }}</h2>
+
+{% for session in sessions_data %}
+    <div class="card">
+        <h3>{{ session.session_title }}</h3>
+        <p>Date: {{ session.scheduled_date }}</p>
+
+        {% if session.records %}
+            <table border="1" cellpadding="8" cellspacing="0">
+                <tr>
+                    <th>Student</th>
+                    <th>Joined At</th>
+                </tr>
+
+                {% for record in session.records %}
+                <tr>
+                    <td>{{ record.student }}</td>
+                    <td>{{ record.joined_at }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p>No attendance recorded.</p>
+        {% endif %}
+
+    </div>
+{% endfor %}
+
+{% endblock %}

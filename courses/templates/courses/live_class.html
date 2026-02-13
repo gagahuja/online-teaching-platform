@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ session.title }} | Live Class</title>
+</head>
+<body>
+
+<h2>{{ session.course.title }}</h2>
+<h3>{{ session.title }}</h3>
+
+<iframe
+    src="https://meet.jit.si/{{ meeting_name }}"
+    style="width:100%; height:600px; border:0;"
+    allow="camera; microphone; fullscreen; display-capture"
+></iframe>
+
+</body>
+</html>
