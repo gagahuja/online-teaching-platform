@@ -15,7 +15,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
-    list_display = ('title', 'course', 'scheduled_date', 'start_time', 'end_time')
+    list_display = ['title', 'course', 'scheduled_date', 'start_time', 'is_active', 'meeting_room']
 
 
 @admin.register(StudentProfile)

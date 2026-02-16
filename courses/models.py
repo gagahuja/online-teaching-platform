@@ -32,6 +32,8 @@ class ClassSession(models.Model):
     start_time = models.TimeField()
     end_time = models.TimeField()
 
+    meeting_room = models.CharField(max_length=255, blank=True, null=True)
+
     is_active = models.BooleanField(default=False)
 
     meeting_id = models.CharField(
