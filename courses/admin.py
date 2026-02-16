@@ -1,4 +1,9 @@
 from django.contrib import admin
+
+admin.site.site_header = "Score Skill Admin"
+admin.site.site_title = "Score Skill Portal"
+admin.site.index_title = "Welcome to Score Skill Administration"
+
 from .models import Course, ClassSession, StudentProfile, Enrollment
 from .models import Attendance
 
