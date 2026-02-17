@@ -25,12 +25,6 @@ class ClassSessionAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Course)
-admin.site.register(Enrollment)
-admin.site.register(StudentProfile)
-admin.site.register(Attendance)
-
-
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'created_at')
