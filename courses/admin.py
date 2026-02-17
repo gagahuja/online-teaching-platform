@@ -13,6 +13,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
+
     list_display = (
         "id",
         "title",
@@ -23,6 +24,10 @@ class ClassSessionAdmin(admin.ModelAdmin):
         "is_active",
         "meeting_room",
     )
+
+    list_filter = ("course", "scheduled_date", "is_active")
+
+    search_fields = ("title", "course__title", "meeting_room")
 
 
 @admin.register(StudentProfile)
