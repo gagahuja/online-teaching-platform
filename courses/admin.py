@@ -1,11 +1,9 @@
 from django.contrib import admin
+from .models import Course, ClassSession, Enrollment, StudentProfile, Attendance
 
 admin.site.site_header = "Score Skill Admin"
 admin.site.site_title = "Score Skill Portal"
 admin.site.index_title = "Welcome to Score Skill Administration"
-
-from .models import Course, ClassSession, StudentProfile, Enrollment
-from .models import Attendance
 
 
 @admin.register(Course)
@@ -15,7 +13,22 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
-    list_display = ['title', 'course', 'scheduled_date', 'start_time', 'is_active', 'meeting_room']
+    list_display = (
+        "id",
+        "title",
+        "course",
+        "scheduled_date",
+        "start_time",
+        "end_time",
+        "is_active",
+        "meeting_room",
+    )
+
+
+admin.site.register(Course)
+admin.site.register(Enrollment)
+admin.site.register(StudentProfile)
+admin.site.register(Attendance)
 
 
 @admin.register(StudentProfile)
