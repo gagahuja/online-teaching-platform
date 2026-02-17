@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('courses', '0005_classsession_is_active'),
+        ('courses', '0006_classsession_meeting_room'),
     ]
 
     operations = [
@@ -13,4 +13,5 @@ class Migration(migrations.Migration):
             reverse_sql="SELECT 1;"
         ),
     ]
+
 
