@@ -1,4 +1,6 @@
 import os
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -140,11 +142,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Security settings for production
 if not DEBUG:
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
@@ -154,5 +153,5 @@ CSRF_TRUSTED_ORIGINS = [
     "https://score-skill.onrender.com",
 ]
 
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
