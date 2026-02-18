@@ -1,4 +1,5 @@
-release: python manage.py migrate --fake courses zero && python manage.py migrate --fake-initial && python manage.py migrate
+release: python manage.py migrate && python manage.py collectstatic --noinput
 web: gunicorn core.wsgi:application
+
 
 
