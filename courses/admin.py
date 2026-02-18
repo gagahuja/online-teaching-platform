@@ -47,6 +47,7 @@ class AttendanceAdmin(admin.ModelAdmin):
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'course', 'order', 'created_at')
+    list_display = ('title', 'course', 'order')
     list_filter = ('course',)
     ordering = ('course', 'order')
+

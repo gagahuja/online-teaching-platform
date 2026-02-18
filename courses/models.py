@@ -21,15 +21,12 @@ class Course(models.Model):
 
 class Module(models.Model):
     course = models.ForeignKey(
-        'Course',
+        Course,
         on_delete=models.CASCADE,
         related_name='modules'
     )
     title = models.CharField(max_length=200)
-    description = models.TextField(blank=True)
-    order = models.PositiveIntegerField(default=1)
-
-    created_at = models.DateTimeField(auto_now_add=True)
+    order = models.PositiveIntegerField(default=0)
 
     class Meta:
         ordering = ['order']
