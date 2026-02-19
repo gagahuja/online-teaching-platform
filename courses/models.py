@@ -26,7 +26,7 @@ class Module(models.Model):
         related_name='modules'
     )
     title = models.CharField(max_length=200)
-    order = models.PositiveIntegerField(default=0)
+    order = models.PositiveIntegerField()
 
     class Meta:
         ordering = ['order']

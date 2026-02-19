@@ -15,7 +15,6 @@ class CourseAdmin(admin.ModelAdmin):
 class ModuleAdmin(admin.ModelAdmin):
     list_display = ('title', 'course', 'order')
     list_filter = ('course',)
-    ordering = ('course', 'order')
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
