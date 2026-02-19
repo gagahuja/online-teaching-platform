@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
-from .models import Course, ClassSession, StudentProfile, Enrollment, Attendance
+from courses.models import Course, ClassSession, StudentProfile, Enrollment, Attendance
 from django.utils.timezone import localtime
 from datetime import datetime
 from django.contrib.auth.models import User
+from django.http import HttpResponse
+
 
 def create_admin(request):
     if not User.objects.filter(username="admin").exists():
