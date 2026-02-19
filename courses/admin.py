@@ -11,6 +11,11 @@ admin.site.index_title = "Welcome to Score Skill Administration"
 class CourseAdmin(admin.ModelAdmin):
     list_display = ('title', 'teacher', 'is_free', 'price', 'created_at')
 
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ('title', 'course', 'order')
+    list_filter = ('course',)
+    ordering = ('course', 'order')
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
@@ -45,9 +50,5 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_display = ('student', 'session', 'joined_at')
     list_filter = ('session',)
 
-@admin.register(Module)
-class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'course', 'order')
-    list_filter = ('course',)
-    ordering = ('course', 'order')
+
 
