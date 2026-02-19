@@ -6,6 +6,6 @@ class CoursesConfig(AppConfig):
     name = 'courses'
 
     def ready(self):
-        
+        pass
         # import courses.signals
 
