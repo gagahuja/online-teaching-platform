@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import live_class, home
-from .views import home, live_class, toggle_session
-from .views import home, live_class, toggle_session, course_attendance
+from core.views import live_class
+from core.views import home, live_class, toggle_session
+from core.views import home, live_class, toggle_session, course_attendance
 
 urlpatterns = [
     path('', home, name='home'),               # 👈 HOME PAGE
