@@ -15,6 +15,7 @@ class CourseAdmin(admin.ModelAdmin):
 class ModuleAdmin(admin.ModelAdmin):
     list_display = ('title', 'course', 'order')
     list_filter = ('course',)
+    search_fields = ('title',)
 
 @admin.register(ClassSession)
 class ClassSessionAdmin(admin.ModelAdmin):
