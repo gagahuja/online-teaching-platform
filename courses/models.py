@@ -27,7 +27,7 @@ class Module(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['course', 'order']
+        ordering = ['order']
 
     def __str__(self):
         return self.title
