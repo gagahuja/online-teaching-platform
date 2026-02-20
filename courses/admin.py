@@ -9,13 +9,13 @@ admin.site.index_title = "Welcome to Score Skill Administration"
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ("ID",)
-    #list_display = ('title', 'teacher', 'is_free', 'price', 'created_at')
+    list_display = ('id','title', 'teacher', 'is_free', 'price', 'created_at')
 
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'order', 'course', 'created_at')
+    list_display = ("id",)
+    #list_display = ('title', 'description', 'order', 'course', 'created_at')
 
 
 @admin.register(ClassSession)
