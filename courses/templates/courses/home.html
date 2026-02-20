@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "courses/base.html" %}
 
 {% block content %}
 
@@ -104,7 +104,7 @@ function toggleSession(sessionId, action) {
     if (!confirm(confirmMessage)) {
         return;
     }
-
+    
     const csrftoken = getCookie('csrftoken');
 
     fetch(`/toggle-session/${sessionId}/`, {
