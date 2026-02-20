@@ -1,6 +1,5 @@
 from django.contrib import admin
 from .models import Course, ClassSession, Enrollment, StudentProfile, Attendance, Module
-from .models import Module
 
 
 admin.site.site_header = "Score Skill Admin"
@@ -15,8 +14,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description','order','course','created_at')
-    
+    list_display = ('title', 'description', 'order', 'course', 'created_at')
 
 
 @admin.register(ClassSession)
@@ -32,7 +30,7 @@ class ClassSessionAdmin(admin.ModelAdmin):
         "meeting_room",
     )
     list_filter = ("course", "scheduled_date", "is_active")
-    search_fields = ("title", "course__title", "meeting_room")
+    search_fields = ("title", "meeting_room")
 
 
 @admin.register(StudentProfile)
