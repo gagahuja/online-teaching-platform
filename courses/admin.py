@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import Course, ClassSession, Enrollment, StudentProfile, Attendance, Module
+from django.contrib import admin
+from .models import Module
 
 
 admin.site.site_header = "Score Skill Admin"
@@ -14,7 +16,7 @@ class CourseAdmin(admin.ModelAdmin):
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'order')
+    list_display = ('title', 'description','order','course','created_at')
     
 
 
