@@ -81,7 +81,7 @@ def home(request):
     return render(request, "courses/home.html", {
         "courses": courses
         })
-    user = request.user
+    '''user = request.user
     now = datetime.now()
 
     if user.is_staff:
@@ -138,7 +138,7 @@ def home(request):
     #return render(request, "courses/home.html", {"courses": courses})
     #return render(request, 'courses/home.html', {
     #    'dashboard_data': dashboard_data
-    #})
+    #})'''
 
 
 from django.http import JsonResponse
