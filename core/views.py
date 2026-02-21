@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from courses.models import Course, ClassSession, StudentProfile, Enrollment, Attendance
@@ -130,9 +130,11 @@ def home(request):
             "sessions": sessions_data
         })
 
-    return render(request, 'courses/home.html', {
-        'dashboard_data': dashboard_data
-    })
+    courses = Course.objects.all()
+    return render(request, "courses/home.html", {"courses": courses})
+    #return render(request, 'courses/home.html', {
+    #    'dashboard_data': dashboard_data
+    #})
 
 
 from django.http import JsonResponse
@@ -193,7 +195,7 @@ def course_attendance(request, course_id):
     }
 
     return render(request, "courses/attendance.html", context)
-    
+
 @login_required
 def enroll_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
