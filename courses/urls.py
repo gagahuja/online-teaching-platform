@@ -8,6 +8,6 @@ urlpatterns = [
     path('live/<int:session_id>/', live_class, name='live_class'),
     path('toggle-session/<int:session_id>/', toggle_session, name='toggle_session'),
     path('attendance/<int:course_id>/', course_attendance, name='course_attendance'),
-    path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
+   # path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
 ]
 

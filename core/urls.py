@@ -21,7 +21,6 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('', include('courses.urls')),
-    path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
+    #path('', include('courses.urls')),
 ]
 
