@@ -17,6 +17,9 @@
 
                             <h5 class="card-title">{{ cls.title }}</h5>
                             <p><strong>Course:</strong> {{ cls.course.title }}</p>
+                                <a href="{% url 'enroll_course' course.id %}" class="btn btn-success">
+                                    Enroll
+                                </a>
                             <p><strong>Date:</strong> {{ cls.scheduled_date }}</p>
                             <p><strong>Time:</strong> {{ cls.start_time }} - {{ cls.end_time }}</p>
 

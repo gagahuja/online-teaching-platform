@@ -194,7 +194,14 @@ def course_attendance(request, course_id):
 
     return render(request, "courses/attendance.html", context)
 
+@login_required
+def enroll_course(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    student = request.user.studentprofile
 
+    Enrollment.objects.get_or_create(student=student, course=course)
+
+    return redirect('home')
 
 
 
