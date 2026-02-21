@@ -77,6 +77,10 @@ from django.shortcuts import render
 
 @login_required
 def home(request):
+    courses = Course.objects.all()
+    return render(request, "courses/home.html", {
+        "courses": courses
+        })
     user = request.user
     now = datetime.now()
 
@@ -130,8 +134,8 @@ def home(request):
             "sessions": sessions_data
         })
 
-    courses = Course.objects.all()
-    return render(request, "courses/home.html", {"courses": courses})
+    #courses = Course.objects.all()
+    #return render(request, "courses/home.html", {"courses": courses})
     #return render(request, 'courses/home.html', {
     #    'dashboard_data': dashboard_data
     #})
