@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from courses.models import Course, ClassSession, StudentProfile, Enrollment, Attendance
@@ -193,11 +193,15 @@ def course_attendance(request, course_id):
     }
 
     return render(request, "courses/attendance.html", context)
-
+    
 @login_required
 def enroll_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
     student = request.user.studentprofile
+
+    # Only students can enroll
+    if student.role != 'student':
+        return redirect('home')
 
     Enrollment.objects.get_or_create(student=student, course=course)
 
