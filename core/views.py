@@ -203,7 +203,9 @@ def course_attendance(request, course_id):
 @login_required
 def enroll_course(request, course_id):
     course = get_object_or_404(Course, id=course_id)
-    student = request.user.studentprofile
+
+    # Ensure profile exists
+    student, created = StudentProfile.objects.get_or_create(user=request.user)
 
     # Only students can enroll
     if student.role != 'student':
