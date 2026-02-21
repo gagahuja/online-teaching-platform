@@ -1,84 +1,44 @@
 {% extends "courses/base.html" %}
 
-<h2 style="color:red;">DEBUG COURSES LENGTH: {{ courses|length }}</h2>
-{% block title %}Dashboard{% endblock %}
-<h3>Available Courses</h3>
-
-{% if courses %}
-    <div class="row">
-        {% for course in courses %}
-            <div class="col-md-4 mb-3">
-                <div class="card p-3">
-                    <h5>{{ course.title }}</h5>
-                    <p>{{ course.description }}</p>
-                    <p><strong>Price:</strong> {{ course.price }}</p>
-
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'enroll_course' course.id %}" class="btn btn-success">
-                            Enroll
-                        </a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-primary">
-                            Login to Enroll
-                        </a>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
-    </div>
-{% else %}
-    <p>No courses available.</p>
-{% endif %}
-
 {% block content %}
+
 <div class="container mt-4">
 
-    <h2 class="mb-4">Welcome to Score Skill Dashboard</h2>
+    <h2>Welcome to Score Skill Dashboard</h2>
 
-    {% if scheduled_classes %}
-        <h4>Your Scheduled Classes</h4>
+    <hr>
+
+    <h3>Available Courses</h3>
+
+    {% if courses %}
         <div class="row">
-            {% for cls in scheduled_classes %}
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
+            {% for course in courses %}
+                <div class="col-md-4 mb-4">
+                    <div class="card p-3 shadow-sm">
+                        <h5>{{ course.title }}</h5>
+                        <p>{{ course.description }}</p>
+                        <p><strong>Price:</strong> {{ course.price }}</p>
 
-                            <h5 class="card-title">{{ cls.title }}</h5>
-                            <p><strong>Course:</strong> {{ cls.course.title }}</p>
-                                <a href="{% url 'enroll_course' course.id %}" class="btn btn-success">
-                                    Enroll
-                                </a>
-                            <p><strong>Date:</strong> {{ cls.scheduled_date }}</p>
-                            <p><strong>Time:</strong> {{ cls.start_time }} - {{ cls.end_time }}</p>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'enroll_course' course.id %}" class="btn btn-success">
+                                Enroll
+                            </a>
+                        {% else %}
+                            <a href="{% url 'login' %}" class="btn btn-primary">
+                                Login to Enroll
+                            </a>
+                        {% endif %}
 
-                            {% if request.user.is_staff %}
-                                {% if cls.is_active %}
-                                    <span class="badge bg-success">Active</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">Inactive</span>
-                                {% endif %}
-                            {% endif %}
-
-                            {% if cls.is_active %}
-                                <a href="{% url 'live_class' cls.id %}" class="btn btn-primary mt-2">
-                                    Join Live Class
-                                </a>
-                            {% else %}
-                                <button class="btn btn-secondary mt-2" disabled>
-                                    Not Active
-                                </button>
-                            {% endif %}
-
-                        </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p>No scheduled classes available.</p>
+        <p>No courses available.</p>
     {% endif %}
 
 </div>
+
 {% endblock %}
 
 
