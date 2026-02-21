@@ -145,9 +145,10 @@ if not DEBUG:
 
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://score-skill.onrender.com",
+    "https://score-skill3.onrender.com",
 ]
 
 import os
