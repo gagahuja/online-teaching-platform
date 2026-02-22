@@ -78,71 +78,19 @@ from django.shortcuts import render
 @login_required
 def home(request):
     courses = Course.objects.all()
+
+    enrolled_courses = []
+
+    if request.user.is_authenticated:
+        profile, _ = StudentProfile.objects.get_or_create(user=request.user)
+        enrolled_courses = Enrollment.objects.filter(
+            student=profile
+        ).values_list('course_id', flat=True)
+
     return render(request, "courses/home.html", {
-        "courses": courses
-        })
-    '''user = request.user
-    now = datetime.now()
-
-    if user.is_staff:
-        courses = Course.objects.filter(teacher=user)
-    else:
-        courses = Course.objects.filter(
-            enrollment__student__user=user
-        ).distinct()
-
-    dashboard_data = []
-
-    for course in courses:
-        sessions_data = []
-
-        for cls in course.sessions.all():
-
-            session_start = datetime.combine(
-                cls.scheduled_date,
-                cls.start_time
-            )
-
-            session_end = datetime.combine(
-                cls.scheduled_date,
-                cls.end_time
-            )
-
-            if now < session_start:
-                status = "upcoming"
-            elif session_start <= now <= session_end:
-                if cls.is_active:
-                    status = "live"
-                else:
-                    status = "waiting"
-            else:
-                status = "ended"
-
-
-            sessions_data.append({
-                "id": cls.id,
-                "title": cls.title,
-                "scheduled_date": cls.scheduled_date,
-                "start_time": cls.start_time,
-                "end_time": cls.end_time,
-                "status": status,
-            })
-
-        dashboard_data.append({
-            "id": course.id,
-            "title": course.title,
-            "sessions": sessions_data
-        })
-
-    #courses = Course.objects.all()
-    #return render(request, "courses/home.html", {"courses": courses})
-    #return render(request, 'courses/home.html', {
-    #    'dashboard_data': dashboard_data
-    #})'''
-
-
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+        "courses": courses,
+        "enrolled_courses": enrolled_courses
+    })
 
 @require_POST
 @login_required
