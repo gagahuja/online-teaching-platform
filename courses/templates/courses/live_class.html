@@ -3,7 +3,9 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<div class="container mt-4"
+     data-staff="{{ user.is_staff }}"
+     data-active="{{ session.is_active }}">
 
     <div class="card shadow p-4">
             {% csrf_token %}

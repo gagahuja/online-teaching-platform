@@ -15,3 +15,17 @@ function toggleSession(sessionId, action) {
         }
     });
 }
+
+// 🔄 Auto refresh for students every 10 seconds
+document.addEventListener("DOMContentLoaded", function () {
+
+    const container = document.querySelector(".container");
+    const isStaff = container.dataset.staff === "True";
+    const isActive = container.dataset.active === "True";
+
+    if (!isStaff && !isActive) {
+        setInterval(function () {
+            window.location.reload();
+        }, 10000);
+    }
+});

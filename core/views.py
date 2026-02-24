@@ -79,62 +79,45 @@ from django.shortcuts import render
 @login_required
 @login_required
 def home(request):
-    profile, _ = StudentProfile.objects.get_or_create(user=request.user)
+    user = request.user
 
-    if request.user.is_staff:
-        courses = Course.objects.filter(teacher=request.user)
-    else:
-        enrolled_ids = Enrollment.objects.filter(
-            student=profile
-        ).values_list('course_id', flat=True)
+    # Ensure profile exists
+    profile, created = StudentProfile.objects.get_or_create(user=user)
 
-        courses = Course.objects.filter(id__in=enrolled_ids)
+    all_courses = Course.objects.all()
 
-    dashboard_data = []
-    now = localtime().replace(tzinfo=None)
+    # ===============================
+    # STUDENT DASHBOARD
+    # ===============================
+    if profile.role == "student":
 
-    for course in courses:
-        sessions_list = []
+        enrolled_courses = Course.objects.filter(
+            enrollment__student=profile
+        ).distinct()
 
-        for session in course.classsession_set.all():
-            session_start = datetime.combine(
-                session.scheduled_date,
-                session.start_time
-            )
+        available_courses = all_courses.exclude(
+            enrollment__student=profile
+        )
 
-            session_end = datetime.combine(
-                session.scheduled_date,
-                session.end_time
-            )
-
-            if now < session_start:
-                status = "upcoming"
-            elif session_start <= now <= session_end:
-                if session.is_active:
-                    status = "live"
-                else:
-                    status = "waiting"
-            else:
-                status = "ended"
-
-            sessions_list.append({
-                "id": session.id,
-                "title": session.title,
-                "scheduled_date": session.scheduled_date,
-                "start_time": session.start_time,
-                "end_time": session.end_time,
-                "status": status
-            })
-
-        dashboard_data.append({
-            "id": course.id,
-            "title": course.title,
-            "sessions": sessions_list
+        return render(request, "courses/home.html", {
+            "role": "student",
+            "enrolled_courses": enrolled_courses,
+            "available_courses": available_courses,
         })
 
-    return render(request, "courses/home.html", {
-        "dashboard_data": dashboard_data
-    })
+    # ===============================
+    # TEACHER DASHBOARD
+    # ===============================
+    if profile.role == "teacher":
+
+        teaching_courses = Course.objects.filter(
+            teacher=user
+        )
+
+        return render(request, "courses/home.html", {
+            "role": "teacher",
+            "teaching_courses": teaching_courses,
+        })
 
 @require_POST
 @login_required
