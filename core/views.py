@@ -96,7 +96,7 @@ def home(request):
     for course in courses:
         sessions_list = []
 
-        for session in course.sessions.all():
+        for session in course.classsession_set.all():
             session_start = datetime.combine(
                 session.scheduled_date,
                 session.start_time
@@ -169,7 +169,7 @@ def course_attendance(request, course_id):
 
     sessions_data = []
 
-    for session in course.sessions.all():
+    for session in course.classsession_set.all():
         attendance_records = Attendance.objects.filter(session=session)
 
         records = []

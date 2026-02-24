@@ -31,7 +31,7 @@ class Module(models.Model):
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        related_name="modules"
+        related_name='sessions'
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
