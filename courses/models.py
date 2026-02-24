@@ -31,7 +31,7 @@ class Module(models.Model):
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        related_name='sessions'
+        related_name="modules"
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -64,7 +64,11 @@ class StudentProfile(models.Model):
 # ===============================
 class ClassSession(models.Model):
     title = models.CharField(max_length=200)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(
+    Course,
+    on_delete=models.CASCADE,
+    related_name='sessions'
+    )
     scheduled_date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
