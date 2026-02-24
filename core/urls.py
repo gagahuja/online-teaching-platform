@@ -25,4 +25,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
     path('toggle-session/<int:session_id>/', views.toggle_session, name='toggle_session'),
+    path('live/<int:session_id>/', views.live_class, name='live_class'),
 ]
