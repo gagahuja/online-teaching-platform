@@ -9,20 +9,36 @@
     {% if role == "student" %}
 
         <!-- ================= MY COURSES ================= -->
-        <h4>🎓 My Courses</h4>
+<h4>🎓 My Courses</h4>
 
-        {% if enrolled_courses %}
-            {% for course in enrolled_courses %}
-                <div class="card p-3 mb-3 shadow-sm">
-                    <h5>{{ course.title }}</h5>
-                    <span class="badge bg-success">Enrolled</span>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>You are not enrolled in any course yet.</p>
-        {% endif %}
+{% if enrolled_data %}
+    {% for item in enrolled_data %}
+        <div class="card p-3 mb-3 shadow-sm">
+            <h5>{{ item.course.title }}</h5>
+            <span class="badge bg-success">Enrolled</span>
 
-        <hr>
+            <br><br>
+
+            {% if item.status == "live" %}
+                <a href="{% url 'live_class' item.session.id %}" class="btn btn-success btn-sm">
+                    🔴 Join Live Now
+                </a>
+
+            {% elif item.status == "upcoming" %}
+                <span class="badge bg-warning text-dark">
+                    🟡 Starts at {{ item.session.start_time }}
+                </span>
+
+            {% else %}
+                <span class="badge bg-secondary">
+                    ⚪ No upcoming sessions
+                </span>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% else %}
+    <p>You are not enrolled in any course yet.</p>
+{% endif %}
 
         <!-- ================= AVAILABLE COURSES ================= -->
         <h4>📚 Available Courses</h4>

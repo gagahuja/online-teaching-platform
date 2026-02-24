@@ -76,19 +76,18 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
-@login_required
+
+
+
+
 @login_required
 def home(request):
     user = request.user
-
-    # Ensure profile exists
-    profile, created = StudentProfile.objects.get_or_create(user=user)
+    profile, _ = StudentProfile.objects.get_or_create(user=user)
 
     all_courses = Course.objects.all()
+    now = localtime().replace(tzinfo=None)
 
-    # ===============================
-    # STUDENT DASHBOARD
-    # ===============================
     if profile.role == "student":
 
         enrolled_courses = Course.objects.filter(
@@ -99,9 +98,43 @@ def home(request):
             enrollment__student=profile
         )
 
+        enrolled_data = []
+
+        for course in enrolled_courses:
+            sessions = course.sessions.all()
+
+            next_status = "no_sessions"
+            next_session = None
+
+            for session in sessions:
+                session_start = datetime.combine(
+                    session.scheduled_date,
+                    session.start_time
+                )
+                session_end = datetime.combine(
+                    session.scheduled_date,
+                    session.end_time
+                )
+
+                if session_start <= now <= session_end and session.is_active:
+                    next_status = "live"
+                    next_session = session
+                    break
+
+                if session_start > now:
+                    next_status = "upcoming"
+                    next_session = session
+                    break
+
+            enrolled_data.append({
+                "course": course,
+                "status": next_status,
+                "session": next_session
+            })
+
         return render(request, "courses/home.html", {
             "role": "student",
-            "enrolled_courses": enrolled_courses,
+            "enrolled_data": enrolled_data,
             "available_courses": available_courses,
         })
 
