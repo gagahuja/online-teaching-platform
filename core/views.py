@@ -78,15 +78,19 @@ from django.shortcuts import render
 
 @login_required
 def home(request):
-    courses = Course.objects.all()
+    profile, _ = StudentProfile.objects.get_or_create(user=request.user)
 
-    enrolled_courses = []
-
-    if request.user.is_authenticated:
-        profile, _ = StudentProfile.objects.get_or_create(user=request.user)
+    if request.user.is_staff:
+        # Teacher dashboard
+        courses = Course.objects.filter(teacher=request.user)
+        enrolled_courses = []
+    else:
+        # Student dashboard
         enrolled_courses = Enrollment.objects.filter(
             student=profile
         ).values_list('course_id', flat=True)
+
+        courses = Course.objects.filter(id__in=enrolled_courses)
 
     return render(request, "courses/home.html", {
         "courses": courses,
