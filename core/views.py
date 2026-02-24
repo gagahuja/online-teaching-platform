@@ -77,24 +77,63 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 @login_required
+@login_required
 def home(request):
     profile, _ = StudentProfile.objects.get_or_create(user=request.user)
 
     if request.user.is_staff:
-        # Teacher dashboard
         courses = Course.objects.filter(teacher=request.user)
-        enrolled_courses = []
     else:
-        # Student dashboard
-        enrolled_courses = Enrollment.objects.filter(
+        enrolled_ids = Enrollment.objects.filter(
             student=profile
         ).values_list('course_id', flat=True)
 
-        courses = Course.objects.filter(id__in=enrolled_courses)
+        courses = Course.objects.filter(id__in=enrolled_ids)
+
+    dashboard_data = []
+    now = localtime().replace(tzinfo=None)
+
+    for course in courses:
+        sessions_list = []
+
+        for session in course.sessions.all():
+            session_start = datetime.combine(
+                session.scheduled_date,
+                session.start_time
+            )
+
+            session_end = datetime.combine(
+                session.scheduled_date,
+                session.end_time
+            )
+
+            if now < session_start:
+                status = "upcoming"
+            elif session_start <= now <= session_end:
+                if session.is_active:
+                    status = "live"
+                else:
+                    status = "waiting"
+            else:
+                status = "ended"
+
+            sessions_list.append({
+                "id": session.id,
+                "title": session.title,
+                "scheduled_date": session.scheduled_date,
+                "start_time": session.start_time,
+                "end_time": session.end_time,
+                "status": status
+            })
+
+        dashboard_data.append({
+            "id": course.id,
+            "title": course.title,
+            "sessions": sessions_list
+        })
 
     return render(request, "courses/home.html", {
-        "courses": courses,
-        "enrolled_courses": enrolled_courses
+        "dashboard_data": dashboard_data
     })
 
 @require_POST

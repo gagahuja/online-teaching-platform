@@ -4,41 +4,45 @@
 
 <div class="container mt-4">
 
-    <h2>Welcome to Score Skill Dashboard</h2>
-
+    <h2>Dashboard</h2>
     <hr>
 
-    <h3>Available Courses</h3>
+    {% if dashboard_data %}
+        {% for course in dashboard_data %}
+            <div class="card mb-4 p-3 shadow-sm">
+                <h4>{{ course.title }}</h4>
 
-    {% if courses %}
-        <div class="row">
-            {% for course in courses %}
-                <div class="col-md-4 mb-4">
-                    <div class="card p-3 shadow-sm">
-                        <h5>{{ course.title }}</h5>
-                        <p>{{ course.description }}</p>
-                        <p><strong>Price:</strong> {{ course.price }}</p>
+                {% if course.sessions %}
+                    <ul class="list-group mt-3">
+                        {% for cls in course.sessions %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ cls.title }}</strong><br>
+                                    {{ cls.scheduled_date }} |
+                                    {{ cls.start_time }} - {{ cls.end_time }}
+                                </div>
 
-                        {% if user.is_authenticated %}
-                            {% if course.id in enrolled_courses %}
-                                <button class="btn btn-secondary" disabled>
-                                    Enrolled
-                                </button>
-                            {% else %}
-                                <a href="{% url 'enroll_course' course.id %}" class="btn btn-success">
-                                    Enroll
-                                </a>
-                            {% endif %}
-                        {% else %}
-                            <a href="{% url 'login' %}" class="btn btn-primary">
-                                Login to Enroll
-                            </a>
-                        {% endif %}
-
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
+                                <div>
+                                    {% if cls.status == "live" %}
+                                        <a href="{% url 'live_class' cls.id %}" class="btn btn-success">
+                                            Join Live
+                                        </a>
+                                    {% elif cls.status == "waiting" %}
+                                        <span class="badge bg-warning text-dark">Waiting</span>
+                                    {% elif cls.status == "upcoming" %}
+                                        <span class="badge bg-info text-dark">Upcoming</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Ended</span>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="mt-2">No sessions available.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
     {% else %}
         <p>No courses available.</p>
     {% endif %}
@@ -46,7 +50,6 @@
 </div>
 
 {% endblock %}
-
 
 
 
