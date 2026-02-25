@@ -17,7 +17,22 @@
             <h5>{{ item.course.title }}</h5>
             <span class="badge bg-success">Enrolled</span>
 
-            <br><br>
+            <hr>
+
+            <!-- Modules -->
+            <h6>📘 Modules:</h6>
+
+            {% if item.modules %}
+                <ul class="list-group mb-2">
+                    {% for module in item.modules %}
+                        <li class="list-group-item">
+                            {{ module.order }}. {{ module.title }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <span class="badge bg-secondary">No modules added yet</span>
+            {% endif %}
 
             {% if item.status == "live" %}
                 <a href="{% url 'live_class' item.session.id %}" class="btn btn-success btn-sm">

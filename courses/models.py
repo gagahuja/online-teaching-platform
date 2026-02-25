@@ -31,12 +31,12 @@ class Module(models.Model):
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        related_name="modules"
+        related_name='modules'
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ["order"]
+        ordering = ['order']
 
     def __str__(self):
         return self.title

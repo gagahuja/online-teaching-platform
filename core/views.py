@@ -126,8 +126,11 @@ def home(request):
                     next_session = session
                     break
 
+            modules = course.modules.all()
+
             enrolled_data.append({
                 "course": course,
+                "modules": modules,
                 "status": next_status,
                 "session": next_session
             })
