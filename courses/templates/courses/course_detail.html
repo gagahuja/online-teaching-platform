@@ -7,12 +7,10 @@
     <hr>
 
     <!-- Progress -->
-    <div class="progress mb-3">
-        <div class="progress-bar bg-success"
-             role="progressbar"
-             data-progress="{{ progress_percent }}">
-            {{ progress_percent }}%
-        </div>
+    <div class="progress-bar bg-success"
+        role="progressbar"
+        data-progress="{{ progress_percent }}">
+        {{ progress_percent }}%
     </div>
 
     <!-- Modules -->
@@ -22,14 +20,15 @@
         <ul class="list-group mb-4">
             {% for module in modules %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>{{ module.order }}. {{ module.title }}</span>
 
-                    {% if profile.role == "student" %}
-                        <a href="{% url 'toggle_module_completion' module.id %}"
-                           class="btn btn-sm btn-outline-success">
-                            ✔ Toggle Complete
-                        </a>
-                    {% endif %}
+                    <div>
+                        <input type="checkbox"
+                            class="module-checkbox"
+                            data-module-id="{{ module.id }}"
+                            {% if module.id in completed_modules %}checked{% endif %}>
+                        {{ module.order }}. {{ module.title }}
+                    </div>
+
                 </li>
             {% endfor %}
         </ul>
@@ -67,4 +66,36 @@
 
 </div>
 
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+    const checkboxes = document.querySelectorAll(".module-checkbox");
+
+    checkboxes.forEach(function(box) {
+        box.addEventListener("change", function() {
+
+            const moduleId = this.dataset.moduleId;
+
+            fetch(`/toggle-module/${moduleId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                // Update progress bar
+                const progressBar = document.querySelector(".progress-bar");
+                progressBar.style.width = data.progress_percent + "%";
+                progressBar.innerText = data.progress_percent + "%";
+
+            });
+
+        });
+    });
+
+});
+</script>
 {% endblock %}

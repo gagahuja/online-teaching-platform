@@ -243,30 +243,38 @@ def enroll_course(request, course_id):
 
 from django.utils import timezone
 
+
+
+@require_POST
 @login_required
 def toggle_module_completion(request, module_id):
     profile = request.user.studentprofile
-
-    if profile.role != "student":
-        return redirect('home')
-
-    module = Module.objects.get(id=module_id)
+    module = get_object_or_404(Module, id=module_id)
 
     progress, created = ModuleProgress.objects.get_or_create(
         student=profile,
         module=module
     )
 
-    if progress.completed:
-        progress.completed = False
-        progress.completed_at = None
-    else:
-        progress.completed = True
-        progress.completed_at = timezone.now()
-
+    progress.completed = not progress.completed
     progress.save()
 
-    return redirect('home')
+    # Recalculate progress %
+    total_modules = module.course.modules.count()
+    completed_count = ModuleProgress.objects.filter(
+        student=profile,
+        module__course=module.course,
+        completed=True
+    ).count()
+
+    percent = 0
+    if total_modules > 0:
+        percent = int((completed_count / total_modules) * 100)
+
+    return JsonResponse({
+        "completed": progress.completed,
+        "progress_percent": percent
+    })
 
 
 @login_required
@@ -284,11 +292,13 @@ def course_detail(request, course_id):
     modules = course.modules.all()
     sessions = course.sessions.all()
 
-    completed_count = ModuleProgress.objects.filter(
+    completed_modules = ModuleProgress.objects.filter(
         student=profile,
         module__course=course,
         completed=True
-    ).count()
+    ).values_list("module_id", flat=True)
+
+    completed_count = completed_modules.count()
 
     total_modules = modules.count()
     progress_percent = 0
@@ -300,5 +310,6 @@ def course_detail(request, course_id):
         "modules": modules,
         "sessions": sessions,
         "progress_percent": progress_percent,
-        "profile": profile
+        "profile": profile,
+        "completed_modules": completed_modules
     })
