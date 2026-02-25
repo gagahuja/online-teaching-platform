@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from courses.models import Module, ModuleProgress
 
 
 
@@ -126,13 +127,26 @@ def home(request):
                     next_session = session
                     break
 
-            modules = course.modules.all()
+                modules = course.modules.all()
+
+                completed_count = ModuleProgress.objects.filter(
+                    student=profile,
+                    module__course=course,
+                    completed=True
+                ).count()
+
+                total_modules = modules.count()
+
+                progress_percent = 0
+                if total_modules > 0:
+                    progress_percent = int((completed_count / total_modules) * 100)
 
             enrolled_data.append({
                 "course": course,
                 "modules": modules,
                 "status": next_status,
-                "session": next_session
+                "session": next_session,
+                "progress_percent": progress_percent
             })
 
         return render(request, "courses/home.html", {
@@ -227,4 +241,64 @@ def enroll_course(request, course_id):
     return redirect('home')
 
 
+from django.utils import timezone
 
+@login_required
+def toggle_module_completion(request, module_id):
+    profile = request.user.studentprofile
+
+    if profile.role != "student":
+        return redirect('home')
+
+    module = Module.objects.get(id=module_id)
+
+    progress, created = ModuleProgress.objects.get_or_create(
+        student=profile,
+        module=module
+    )
+
+    if progress.completed:
+        progress.completed = False
+        progress.completed_at = None
+    else:
+        progress.completed = True
+        progress.completed_at = timezone.now()
+
+    progress.save()
+
+    return redirect('home')
+
+
+@login_required
+def course_detail(request, course_id):
+    user = request.user
+    profile, _ = StudentProfile.objects.get_or_create(user=user)
+
+    course = get_object_or_404(Course, id=course_id)
+
+    # Permission check
+    if profile.role == "student":
+        if not Enrollment.objects.filter(student=profile, course=course).exists():
+            return redirect("home")
+
+    modules = course.modules.all()
+    sessions = course.sessions.all()
+
+    completed_count = ModuleProgress.objects.filter(
+        student=profile,
+        module__course=course,
+        completed=True
+    ).count()
+
+    total_modules = modules.count()
+    progress_percent = 0
+    if total_modules > 0:
+        progress_percent = int((completed_count / total_modules) * 100)
+
+    return render(request, "courses/course_detail.html", {
+        "course": course,
+        "modules": modules,
+        "sessions": sessions,
+        "progress_percent": progress_percent,
+        "profile": profile
+    })

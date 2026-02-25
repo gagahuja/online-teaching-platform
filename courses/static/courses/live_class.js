@@ -29,3 +29,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 10000);
     }
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const bars = document.querySelectorAll(".progress-bar");
+    bars.forEach(function(bar) {
+        const percent = bar.dataset.progress;
+        if (percent) {
+            bar.style.width = percent + "%";
+        }
+    });
+});

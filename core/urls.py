@@ -26,4 +26,6 @@ urlpatterns = [
     path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
     path('toggle-session/<int:session_id>/', views.toggle_session, name='toggle_session'),
     path('live/<int:session_id>/', views.live_class, name='live_class'),
+    path('module/toggle/<int:module_id>/', views.toggle_module_completion, name='toggle_module_completion'),
+    path('course/<int:course_id>/', views.course_detail, name='course_detail'),
 ]
