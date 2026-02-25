@@ -248,7 +248,7 @@ from django.utils import timezone
 @require_POST
 @login_required
 def toggle_module_completion(request, module_id):
-    profile = request.user.studentprofile
+    profile, _ = StudentProfile.objects.get_or_create(user=request.user)
     module = get_object_or_404(Module, id=module_id)
 
     progress, created = ModuleProgress.objects.get_or_create(
