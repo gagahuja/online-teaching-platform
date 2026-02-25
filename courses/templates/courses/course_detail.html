@@ -24,9 +24,8 @@
                     <div>
                         <input type="checkbox"
                             class="module-checkbox"
-                            data-module-id="{{ module.id }}"
+                            data-url="{% url 'toggle_module_completion' module.id %}"
                             {% if module.id in completed_modules %}checked{% endif %}>
-                        {{ module.order }}. {{ module.title }}
                     </div>
 
                 </li>
@@ -90,9 +89,9 @@ document.addEventListener("DOMContentLoaded", function() {
     checkboxes.forEach(function(box) {
         box.addEventListener("change", function() {
 
-            const moduleId = this.dataset.moduleId;
+            const url = this.dataset.url;
 
-            fetch(`/toggle-module/${moduleId}/`, {
+                fetch(url, {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": getCSRFToken(),
