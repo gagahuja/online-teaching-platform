@@ -102,3 +102,27 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.student.user.username} - {self.session.title}"
+
+
+# ===============================
+# MODULE PROGRESS
+# ===============================
+class ModuleProgress(models.Model):
+    student = models.ForeignKey(
+        StudentProfile,
+        on_delete=models.CASCADE,
+        related_name='module_progress'
+    )
+    module = models.ForeignKey(
+        Module,
+        on_delete=models.CASCADE,
+        related_name='progress'
+    )
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('student', 'module')
+
+    def __str__(self):
+        return f"{self.student.user.username} - {self.module.title}"
