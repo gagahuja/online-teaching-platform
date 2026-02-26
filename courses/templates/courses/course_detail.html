@@ -32,6 +32,7 @@
 <input type="checkbox"
        class="module-checkbox"
        data-url="{% url 'toggle_module_completion' module.id %}"
+       data-order="{{ module.order }}"
        {% if module.completed %}checked{% endif %}>
 
 {{ module.order }}. {{ module.title }}
@@ -79,14 +80,15 @@
 
 
 <script>
-function getCSRFToken() {
+
+function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
         const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, 10) === ('csrftoken=')) {
-                cookieValue = decodeURIComponent(cookie.substring(10));
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
             }
         }
@@ -94,34 +96,49 @@ function getCSRFToken() {
     return cookieValue;
 }
 
-document.addEventListener("DOMContentLoaded", function() {
+document.querySelectorAll(".module-checkbox").forEach(cb => {
 
-    const checkboxes = document.querySelectorAll(".module-checkbox");
+    cb.addEventListener("change", function() {
 
-    checkboxes.forEach(function(box) {
-        box.addEventListener("change", function() {
+        const url = this.dataset.url;
+        const currentOrder = parseInt(this.dataset.order);
 
-            const url = this.dataset.url;
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+                "Content-Type": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
 
-                fetch(url, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": getCSRFToken(),
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
+            if(data.success){
 
-                const progressBar = document.querySelector(".progress-bar");
+                // unlock next module instantly
+                document.querySelectorAll(".module-checkbox").forEach(nextCb => {
 
-                progressBar.style.width = data.progress_percent + "%";
-                progressBar.innerText = data.progress_percent + "%";
+                    const order = parseInt(nextCb.dataset.order);
 
-            });
+                    if(order === currentOrder + 1){
+                        nextCb.disabled = false;
+
+                        const lockIcon = nextCb.closest("li").querySelector(".lock-icon");
+                        if(lockIcon){
+                            lockIcon.remove();
+                        }
+                    }
+                });
+
+                location.reload();
+            }
+
         });
+
     });
 
 });
+
 </script>
 
 {% endblock %}
