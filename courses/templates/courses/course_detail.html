@@ -13,6 +13,12 @@
         {{ progress_percent }}%
     </div>
 
+    {% if progress_percent == 100 %}
+        <a href="{% url 'download_certificate' course.id %}"
+        class="btn btn-success mt-3">
+        Download Certificate
+        </a>
+    {% endif %}
     <!-- Modules -->
     <h4>📘 Modules</h4>
 

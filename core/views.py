@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from courses.models import Module, ModuleProgress
+from reportlab.pdfgen import canvas
 
 
 
@@ -341,3 +342,45 @@ def course_detail(request, course_id):
         "sessions": sessions,
         "progress_percent": progress_percent
     })
+
+
+@login_required
+def download_certificate(request, course_id):
+
+    course = get_object_or_404(Course, id=course_id)
+    profile = StudentProfile.objects.get(user=request.user)
+
+    total_modules = Module.objects.filter(course=course).count()
+
+    completed_modules = ModuleProgress.objects.filter(
+        student=profile,
+        module__course=course,
+        completed=True
+    ).count()
+
+    if total_modules == 0 or completed_modules < total_modules:
+        return HttpResponse("Course not completed", status=403)
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="certificate_{course.title}.pdf"'
+
+    p = canvas.Canvas(response)
+
+    p.setFont("Helvetica", 24)
+    p.drawString(100, 750, "Certificate of Completion")
+
+    p.setFont("Helvetica", 16)
+    p.drawString(100, 700, "This certifies that")
+
+    p.setFont("Helvetica", 18)
+    p.drawString(100, 650, request.user.username)
+
+    p.setFont("Helvetica", 16)
+    p.drawString(100, 600, "has completed the course")
+
+    p.setFont("Helvetica", 18)
+    p.drawString(100, 550, course.title)
+
+    p.save()
+
+    return response
