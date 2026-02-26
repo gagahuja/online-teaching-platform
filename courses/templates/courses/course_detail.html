@@ -17,20 +17,32 @@
     <h4>📘 Modules</h4>
 
     {% if modules %}
-        <ul class="list-group mb-4">
-            {% for module in modules %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+        <ul>
 
-                    <div>
-                        <input type="checkbox"
-                            class="module-checkbox"
-                            data-url="{% url 'toggle_module_completion' module.id %}"
-                            {% if module.id in completed_modules %}checked{% endif %}>
-                    </div>
+{% for module in modules %}
 
-                </li>
-            {% endfor %}
-        </ul>
+<li>
+
+{% if module.locked %}
+
+🔒 {{ module.order }}. {{ module.title }}
+
+{% else %}
+
+<input type="checkbox"
+       class="module-checkbox"
+       data-url="{% url 'toggle_module_completion' module.id %}"
+       {% if module.completed %}checked{% endif %}>
+
+{{ module.order }}. {{ module.title }}
+
+{% endif %}
+
+</li>
+
+{% endfor %}
+
+</ul>
     {% else %}
         <p>No modules added.</p>
     {% endif %}

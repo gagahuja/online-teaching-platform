@@ -1,3 +1,5 @@
+from sys import modules
+
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
@@ -277,39 +279,65 @@ def toggle_module_completion(request, module_id):
     })
 
 
+from django.shortcuts import render, get_object_or_404
+from courses.models import Course, Module, ModuleProgress, ClassSession, StudentProfile
+from django.contrib.auth.decorators import login_required
+
+
 @login_required
 def course_detail(request, course_id):
-    user = request.user
-    profile, _ = StudentProfile.objects.get_or_create(user=user)
 
     course = get_object_or_404(Course, id=course_id)
 
-    # Permission check
-    if profile.role == "student":
-        if not Enrollment.objects.filter(student=profile, course=course).exists():
-            return redirect("home")
+    profile = StudentProfile.objects.get(user=request.user)
 
-    modules = course.modules.all()
-    sessions = course.sessions.all()
+    modules = Module.objects.filter(course=course).order_by("order")
 
-    completed_modules = ModuleProgress.objects.filter(
+    module_data = []
+
+    previous_completed = True
+
+    for module in modules:
+
+        completed = ModuleProgress.objects.filter(
+            student=profile,
+            module=module,
+            completed=True
+        ).exists()
+
+        locked = not previous_completed
+
+        module_data.append({
+            "id": module.id,
+            "title": module.title,
+            "order": module.order,
+            "completed": completed,
+            "locked": locked
+        })
+
+        previous_completed = completed
+
+
+    completed_count = ModuleProgress.objects.filter(
         student=profile,
         module__course=course,
         completed=True
-    ).values_list("module_id", flat=True)
-
-    completed_count = completed_modules.count()
+    ).count()
 
     total_modules = modules.count()
+
     progress_percent = 0
+
     if total_modules > 0:
         progress_percent = int((completed_count / total_modules) * 100)
 
+
+    sessions = ClassSession.objects.filter(course=course)
+
+
     return render(request, "courses/course_detail.html", {
         "course": course,
-        "modules": modules,
+        "modules": module_data,
         "sessions": sessions,
-        "progress_percent": progress_percent,
-        "profile": profile,
-        "completed_modules": completed_modules
+        "progress_percent": progress_percent
     })
