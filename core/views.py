@@ -347,6 +347,11 @@ def course_detail(request, course_id):
 @login_required
 def download_certificate(request, course_id):
 
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.units import inch
+    from datetime import datetime
+
     course = get_object_or_404(Course, id=course_id)
     profile = StudentProfile.objects.get(user=request.user)
 
@@ -361,25 +366,59 @@ def download_certificate(request, course_id):
     if total_modules == 0 or completed_modules < total_modules:
         return HttpResponse("Course not completed", status=403)
 
+
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="certificate_{course.title}.pdf"'
 
-    p = canvas.Canvas(response)
+    response['Content-Disposition'] = (
+        f'attachment; filename="ScoreSkill_Certificate_{course.title}.pdf"'
+    )
 
-    p.setFont("Helvetica", 24)
-    p.drawString(100, 750, "Certificate of Completion")
+    p = canvas.Canvas(response, pagesize=A4)
 
-    p.setFont("Helvetica", 16)
-    p.drawString(100, 700, "This certifies that")
+    width, height = A4
 
+
+    # Border
+    p.setLineWidth(4)
+    p.rect(30, 30, width - 60, height - 60)
+
+
+    # Title
+    p.setFont("Helvetica-Bold", 32)
+    p.drawCentredString(width / 2, height - 150, "Certificate of Completion")
+
+
+    # Subtitle
     p.setFont("Helvetica", 18)
-    p.drawString(100, 650, request.user.username)
+    p.drawCentredString(width / 2, height - 220, "This certifies that")
 
-    p.setFont("Helvetica", 16)
-    p.drawString(100, 600, "has completed the course")
 
+    # Student Name
+    p.setFont("Helvetica-Bold", 24)
+    p.drawCentredString(width / 2, height - 280, request.user.username)
+
+
+    # Course text
     p.setFont("Helvetica", 18)
-    p.drawString(100, 550, course.title)
+    p.drawCentredString(width / 2, height - 340, "has successfully completed the course")
+
+
+    # Course Name
+    p.setFont("Helvetica-Bold", 22)
+    p.drawCentredString(width / 2, height - 400, course.title)
+
+
+    # Date
+    date = datetime.now().strftime("%d %B %Y")
+
+    p.setFont("Helvetica", 14)
+    p.drawCentredString(width / 2, height - 480, f"Date: {date}")
+
+
+    # Footer
+    p.setFont("Helvetica-Bold", 16)
+    p.drawCentredString(width / 2, height - 550, "Score Skill LMS")
+
 
     p.save()
 
