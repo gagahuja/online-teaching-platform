@@ -1,125 +1,53 @@
 {% extends "courses/base.html" %}
+
 {% block content %}
 
 <div class="container mt-4">
 
-    <h2>Welcome to Score Skill Dashboard</h2>
-    <hr>
+<h2>Student Dashboard</h2>
 
-    {% if role == "student" %}
+{% for item in course_sessions %}
 
-        <!-- ================= MY COURSES ================= -->
-<h4>🎓 My Courses</h4>
+<div class="card mb-3">
 
-{% if enrolled_data %}
-    {% for item in enrolled_data %}
-        <div class="card p-3 mb-3 shadow-sm">
-            <h5>{{ item.course.title }}</h5>
-            <span class="badge bg-success">Enrolled</span>
-            <a href="{% url 'course_detail' item.course.id %}"
-                class="btn btn-primary btn-sm mt-2">
-                Open Course
-            </a>
-            <hr>
-        <div class="progress mb-2">
-            <div class="progress-bar bg-success"
-                role="progressbar"
-                aria-valuenow="{{ item.progress_percent }}"
-                aria-valuemin="0"
-                aria-valuemax="100"
-                data-progress="{{ item.progress_percent }}">
-                {{ item.progress_percent }}%
-            </div>
-        </div>
-            <!-- Modules -->
-            <h6>📘 Modules:</h6>
+<div class="card-body">
 
-            {% if item.modules %}
-                <ul class="list-group mb-2">
-                    {% for module in item.modules %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span>
-                                {{ module.order }}. {{ module.title }}
-                            </span>
+<h4>{{ item.course.title }}</h4>
 
-                            <a href="{% url 'toggle_module_completion' module.id %}"
-                                class="btn btn-sm btn-outline-success">
-                                ✔ Mark Complete
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <span class="badge bg-secondary">No modules added yet</span>
-            {% endif %}
+<ul class="list-group">
 
-            {% if item.status == "live" %}
-                <a href="{% url 'live_class' item.session.id %}" class="btn btn-success btn-sm">
-                    🔴 Join Live Now
-                </a>
+{% for session in item.sessions %}
 
-            {% elif item.status == "upcoming" %}
-                <span class="badge bg-warning text-dark">
-                    🟡 Starts at {{ item.session.start_time }}
-                </span>
+<li class="list-group-item d-flex justify-content-between">
 
-            {% else %}
-                <span class="badge bg-secondary">
-                    ⚪ No upcoming sessions
-                </span>
-            {% endif %}
-        </div>
-    {% endfor %}
-{% else %}
-    <p>You are not enrolled in any course yet.</p>
-{% endif %}
+<div>
+{{ session.title }}
+</div>
 
-        <!-- ================= AVAILABLE COURSES ================= -->
-        <h4>📚 Available Courses</h4>
+<a href="{% url 'live_class' session.id %}" class="btn btn-success btn-sm">
+Join Live Class
+</a>
 
-        {% if available_courses %}
-            {% for course in available_courses %}
-                <div class="card p-3 mb-3 shadow-sm">
-                    <h5>{{ course.title }}</h5>
+</li>
 
-                    {% if course.is_free %}
-                        <span class="badge bg-info">Free</span>
-                    {% else %}
-                        <span class="badge bg-warning text-dark">Paid</span>
-                    {% endif %}
+{% empty %}
 
-                    <br><br>
+<li class="list-group-item">
+No live sessions currently
+</li>
 
-                    <a href="{% url 'enroll_course' course.id %}" class="btn btn-primary btn-sm">
-                        Enroll
-                    </a>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>No available courses.</p>
-        {% endif %}
+{% endfor %}
 
-    {% elif role == "teacher" %}
+</ul>
 
-        <!-- ================= TEACHER COURSES ================= -->
-        <h4>👨‍🏫 My Teaching Courses</h4>
+</div>
+</div>
 
-        {% if teaching_courses %}
-            {% for course in teaching_courses %}
-                <div class="card p-3 mb-3 shadow-sm">
-                    <h5>{{ course.title }}</h5>
-                    <span class="badge bg-dark">Teacher</span>
-                    <a href="{% url 'course_detail' course.id %}"
-                        class="btn btn-primary btn-sm mt-2">
-                        Manage Course
-                    </a>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>You are not teaching any course yet.</p>
-        {% endif %}
+{% empty %}
 
-    {% endif %}
+<p>You are not enrolled in any courses</p>
+
+{% endfor %}
 
 </div>
 

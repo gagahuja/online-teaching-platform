@@ -12,165 +12,71 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from courses.models import Module, ModuleProgress
 from reportlab.pdfgen import canvas
+from django.shortcuts import render, redirect
 
-
+import json
 
 
 @login_required
 def live_class(request, session_id):
+
     session = get_object_or_404(ClassSession, id=session_id)
     user = request.user
 
+    profile = StudentProfile.objects.get(user=user)
+
     # Permission check
-    if user.is_staff:
-        allowed = True
-    else:
-        try:
-            student = StudentProfile.objects.get(user=user)
-            allowed = Enrollment.objects.filter(
-                student=student,
-                course=session.course
-            ).exists()
-        except StudentProfile.DoesNotExist:
-            allowed = False
+    if profile.role == "student":
+        enrolled = Enrollment.objects.filter(
+            student=profile,
+            course=session.course
+        ).exists()
 
-    if not allowed:
-        return HttpResponseForbidden("You are not enrolled in this course.")
+        if not enrolled:
+            return HttpResponseForbidden("Not enrolled")
 
-    # 🕒 Time restriction
-    now = localtime()
-
-    session_start = datetime.combine(
-        session.scheduled_date,
-        session.start_time
-    )
-
-    session_end = datetime.combine(
-        session.scheduled_date,
-        session.end_time
-    )
-
-    if now.replace(tzinfo=None) < session_start:
-        return HttpResponseForbidden("Class has not started yet.")
-
-    if now.replace(tzinfo=None) > session_end:
-        return HttpResponseForbidden("Class has already ended.")
-    
-    if not session.is_active:
-        return HttpResponseForbidden("Class has not been started by the teacher yet.")
-
-
-    # Attendance
-    if not user.is_staff:
-        student = StudentProfile.objects.get(user=user)
-
+    # Attendance auto log
+    if profile.role == "student":
         Attendance.objects.get_or_create(
-            student=student,
+            student=profile,
             session=session
         )
 
-    meeting_name = f"course{session.course.id}_session{session.id}"
+    meeting_name = f"ScoreSkill_{session.course.id}_{session.id}"
 
-    return render(request, 'courses/live_class.html', {
-        'session': session,
-        'meeting_name': meeting_name,
+    return render(request, "courses/live_class.html", {
+        "session": session,
+        "meeting_name": meeting_name,
+        "user_role": profile.role
     })
-
-from datetime import datetime
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-
-
-
-
 
 @login_required
 def home(request):
-    user = request.user
-    profile, _ = StudentProfile.objects.get_or_create(user=user)
 
-    all_courses = Course.objects.all()
-    now = localtime().replace(tzinfo=None)
+    profile = StudentProfile.objects.get(user=request.user)
 
-    if profile.role == "student":
-
-        enrolled_courses = Course.objects.filter(
-            enrollment__student=profile
-        ).distinct()
-
-        available_courses = all_courses.exclude(
-            enrollment__student=profile
-        )
-
-        enrolled_data = []
-
-        for course in enrolled_courses:
-            sessions = course.sessions.all()
-
-            next_status = "no_sessions"
-            next_session = None
-
-            for session in sessions:
-                session_start = datetime.combine(
-                    session.scheduled_date,
-                    session.start_time
-                )
-                session_end = datetime.combine(
-                    session.scheduled_date,
-                    session.end_time
-                )
-
-                if session_start <= now <= session_end and session.is_active:
-                    next_status = "live"
-                    next_session = session
-                    break
-
-                if session_start > now:
-                    next_status = "upcoming"
-                    next_session = session
-                    break
-
-                modules = course.modules.all()
-
-                completed_count = ModuleProgress.objects.filter(
-                    student=profile,
-                    module__course=course,
-                    completed=True
-                ).count()
-
-                total_modules = modules.count()
-
-                progress_percent = 0
-                if total_modules > 0:
-                    progress_percent = int((completed_count / total_modules) * 100)
-
-            enrolled_data.append({
-                "course": course,
-                "modules": modules,
-                "status": next_status,
-                "session": next_session,
-                "progress_percent": progress_percent
-            })
-
-        return render(request, "courses/home.html", {
-            "role": "student",
-            "enrolled_data": enrolled_data,
-            "available_courses": available_courses,
-        })
-
-    # ===============================
-    # TEACHER DASHBOARD
-    # ===============================
     if profile.role == "teacher":
+        return teacher_dashboard(request)
 
-        teaching_courses = Course.objects.filter(
-            teacher=user
+    enrollments = profile.enrollment_set.select_related("course")
+
+    course_sessions = []
+
+    for enrollment in enrollments:
+
+        sessions = ClassSession.objects.filter(
+            course=enrollment.course,
+            is_active=True
         )
 
-        return render(request, "courses/home.html", {
-            "role": "teacher",
-            "teaching_courses": teaching_courses,
+        course_sessions.append({
+            "course": enrollment.course,
+            "sessions": sessions
         })
+
+    return render(request, "courses/home.html", {
+        "course_sessions": course_sessions
+    })
 
 @require_POST
 @login_required
@@ -423,3 +329,384 @@ def download_certificate(request, course_id):
     p.save()
 
     return response
+
+    # ===============================
+# TEACHER DASHBOARD
+# ===============================
+
+from django.contrib.auth.decorators import login_required
+from courses.models import Course, ClassSession, StudentProfile
+from django.shortcuts import render
+
+@login_required
+def teacher_dashboard(request):
+
+    profile = StudentProfile.objects.get(user=request.user)
+
+    if profile.role != "teacher":
+        return render(request, "courses/home.html")
+
+    courses = Course.objects.filter(teacher=request.user)
+
+    course_sessions = []
+
+    for course in courses:
+        sessions = ClassSession.objects.filter(course=course).order_by("scheduled_date")
+
+        course_sessions.append({
+            "course": course,
+            "sessions": sessions
+        })
+
+    return render(request, "courses/teacher_dashboard.html", {
+        "course_sessions": course_sessions
+    })
+
+# ===============================
+# CREATE COURSE
+# ===============================
+
+@login_required
+def create_course(request):
+
+    profile = StudentProfile.objects.get(user=request.user)
+
+    if profile.role != "teacher":
+        return redirect("home")
+
+    if request.method == "POST":
+
+        title = request.POST.get("title")
+
+        description = request.POST.get("description")
+
+        price = request.POST.get("price") or 0
+
+        Course.objects.create(
+            title=title,
+            description=description,
+            teacher=request.user,
+            price=price
+        )
+
+        return redirect("teacher_dashboard")
+
+    return render(request, "courses/create_course.html")
+
+
+# ===============================
+# ADD MODULE
+# ===============================
+
+@login_required
+def add_module(request, course_id):
+
+    course = Course.objects.get(id=course_id)
+
+    if request.method == "POST":
+
+        title = request.POST.get("title")
+
+        order = request.POST.get("order")
+
+        Module.objects.create(
+            course=course,
+            title=title,
+            order=order
+        )
+
+        return redirect("teacher_dashboard")
+
+    return render(
+        request,
+        "courses/add_module.html",
+        {"course": course}
+    )
+
+
+# ===============================
+# ADD SESSION
+# ===============================
+
+@login_required
+def add_session(request, course_id):
+
+    course = Course.objects.get(id=course_id)
+
+    if request.method == "POST":
+
+        title = request.POST.get("title")
+
+        date = request.POST.get("date")
+
+        start = request.POST.get("start")
+
+        end = request.POST.get("end")
+
+        ClassSession.objects.create(
+            course=course,
+            title=title,
+            scheduled_date=date,
+            start_time=start,
+            end_time=end
+        )
+
+        return redirect("teacher_dashboard")
+
+    return render(
+        request,
+        "courses/add_session.html",
+        {"course": course}
+    )
+
+
+    from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from courses.models import Course, StudentProfile
+
+@login_required
+def create_course(request):
+    
+    profile = StudentProfile.objects.get(user=request.user)
+
+    # Only teacher allowed
+    if profile.role != "teacher":
+        return redirect("home")
+
+    if request.method == "POST":
+        title = request.POST.get("title")
+        description = request.POST.get("description")
+        price = request.POST.get("price") or 0
+        is_free = request.POST.get("is_free") == "on"
+
+        Course.objects.create(
+            title=title,
+            description=description,
+            teacher=request.user,
+            price=price,
+            is_free=is_free
+        )
+
+        return redirect("teacher_dashboard")
+
+    return render(request, "courses/create_course.html")
+
+from courses.forms import CourseForm
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def create_course(request):
+
+    profile = request.user.studentprofile
+
+    if profile.role != "teacher":
+        return redirect("home")
+
+    if request.method == "POST":
+
+        form = CourseForm(request.POST)
+
+        if form.is_valid():
+
+            course = form.save(commit=False)
+
+            course.teacher = request.user
+
+            course.save()
+
+            return redirect("teacher_dashboard")
+
+    else:
+
+        form = CourseForm()
+
+    return render(request, "courses/create_course.html", {
+        "form": form
+    })
+
+
+
+from courses.forms import ModuleForm
+
+@login_required
+def add_module(request, course_id):
+
+    profile = request.user.studentprofile
+
+    if profile.role != "teacher":
+        return redirect("home")
+
+    course = Course.objects.get(id=course_id)
+
+    if request.method == "POST":
+
+        form = ModuleForm(request.POST)
+
+        if form.is_valid():
+
+            module = form.save(commit=False)
+
+            module.course = course
+
+            module.save()
+
+            return redirect("teacher_dashboard")
+
+    else:
+
+        form = ModuleForm()
+
+    return render(request, "courses/add_module.html", {
+        "form": form,
+        "course": course
+    })
+
+
+@login_required
+def manage_course(request, course_id):
+
+    profile = request.user.studentprofile
+
+    if profile.role != "teacher":
+        return redirect("home")
+
+    course = Course.objects.get(id=course_id)
+
+    modules = course.modules.all()
+
+    return render(request, "courses/manage_course.html", {
+        "course": course,
+        "modules": modules
+    })
+
+
+from courses.forms import SessionForm
+
+@login_required
+def add_session(request, course_id):
+
+    profile = request.user.studentprofile
+
+    if profile.role != "teacher":
+        return redirect("home")
+
+    course = Course.objects.get(id=course_id)
+
+    if request.method == "POST":
+
+        form = SessionForm(request.POST)
+
+        if form.is_valid():
+
+            session = form.save(commit=False)
+
+            session.course = course
+
+            session.save()
+
+            return redirect("manage_course", course_id=course.id)
+
+    else:
+
+        form = SessionForm()
+
+    return render(request, "courses/add_session.html", {
+        "form": form,
+        "course": course
+    })
+
+
+@login_required
+def student_dashboard(request):
+
+    profile = request.user.studentprofile
+
+    if profile.role != 'student':
+        return redirect('home')
+
+    enrollments = Enrollment.objects.filter(student=profile)
+
+    context = {
+        "enrollments": enrollments
+    }
+
+    return render(request, "courses/student_dashboard.html", context)
+
+
+
+@login_required
+def teacher_live_panel(request, session_id):
+
+    profile = StudentProfile.objects.get(user=request.user)
+
+    if profile.role != "teacher":
+        return HttpResponseForbidden()
+
+    session = ClassSession.objects.get(id=session_id)
+
+    attendance = Attendance.objects.filter(session=session)
+
+    return render(request, "courses/teacher_live_panel.html", {
+        "session": session,
+        "attendance": attendance
+    })
+
+
+@login_required
+def toggle_session_status(request, session_id):
+
+    if request.method == "POST":
+
+        session = ClassSession.objects.get(id=session_id)
+
+        data = json.loads(request.body)
+
+        action = data.get("action")
+
+        if action == "start":
+            session.is_active = True
+
+        elif action == "end":
+            session.is_active = False
+
+        session.save()
+
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False})
+
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+
+@csrf_exempt
+@login_required
+def start_session(request, session_id):
+    if request.method == "POST":
+        session = ClassSession.objects.get(id=session_id)
+        session.is_active = True
+        session.save()
+
+        return JsonResponse({
+            "success": True,
+            "status": "started"
+        })
+
+    return JsonResponse({"success": False})
+
+
+@csrf_exempt
+@login_required
+def stop_session(request, session_id):
+    if request.method == "POST":
+        session = ClassSession.objects.get(id=session_id)
+        session.is_active = False
+        session.save()
+
+        return JsonResponse({
+            "success": True,
+            "status": "stopped"
+        })
+
+    return JsonResponse({"success": False})

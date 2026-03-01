@@ -11,3 +11,20 @@ urlpatterns = [
    # path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
 ]
 
+from django.urls import path
+from core import views
+
+urlpatterns = [
+
+    path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
+
+    path('teacher/course/create/', views.create_course, name='create_course'),
+
+    path('teacher/course/<int:course_id>/module/add/',
+         views.add_module,
+         name='add_module'),
+
+    path('teacher/course/<int:course_id>/session/add/',
+         views.add_session,
+         name='add_session'),
+]

@@ -1,0 +1,36 @@
+{% extends "courses/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Student Dashboard</h2>
+
+{% if enrollments %}
+
+    {% for enrollment in enrollments %}
+
+    <div class="card mb-3 p-3">
+
+        <h5>{{ enrollment.course.title }}</h5>
+
+        <a href="/course/{{ enrollment.course.id }}/"
+           class="btn btn-success">
+
+Open Course
+
+        </a>
+
+    </div>
+
+    {% endfor %}
+
+{% else %}
+
+<p>You are not enrolled in any course.</p>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,177 @@
+{% extends "courses/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Teacher Dashboard</h2>
+
+<a href="{% url 'create_course' %}" class="btn btn-primary mb-3">
+Create New Course
+</a>
+
+{% if course_sessions %}
+
+{% for item in course_sessions %}
+
+<div class="card mb-4 shadow-sm">
+
+<div class="card-body">
+
+<h5>{{ item.course.title }}</h5>
+
+<a href="{% url 'manage_course' item.course.id %}">
+Manage Course
+</a>
+
+<hr>
+
+<h6>Sessions</h6>
+
+<ul class="list-group">
+
+{% if item.sessions %}
+
+{% for session in item.sessions %}
+
+<li class="list-group-item d-flex justify-content-between align-items-center">
+
+<div>
+<strong>{{ session.title }}</strong><br>
+{{ session.scheduled_date }} | {{ session.start_time }}
+</div>
+
+<div>
+
+<div class="btn-group">
+
+<button onclick="toggleSession('{{ session.id }}','start')" class="btn btn-success">
+Start Live
+</button>
+
+<button onclick="toggleSession('{{ session.id }}','end')" class="btn btn-danger">
+Stop Live
+</button>
+
+<a href="/teacher/live/{{ session.id }}/" class="btn btn-primary">
+Enter Classroom
+</a>
+
+</div>
+
+<a href="{% url 'live_class' session.id %}"
+class="btn btn-success btn-sm">
+Enter Classroom
+</a>
+
+</div>
+
+</li>
+
+{% endfor %}
+
+{% else %}
+
+<li class="list-group-item">
+No sessions created yet
+</li>
+
+{% endif %}
+
+</ul>
+
+</div>
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<p>No courses created yet.</p>
+
+{% endif %}
+
+</div>
+
+<script>
+function toggleSession(sessionId, action) {
+
+    fetch(`/teacher/session/${sessionId}/toggle/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({
+            action: action
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Session " + action + " successful");
+            location.reload();
+        } else {
+            alert("Error updating session");
+        }
+    });
+}
+
+
+function getCookie(name) {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+function startSession(sessionId) {
+
+fetch(`/teacher/start-session/${sessionId}/`, {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"X-CSRFToken": "{{ csrf_token }}"
+}
+})
+.then(response => response.json())
+.then(data => {
+if (data.success){
+alert("Session Started")
+location.reload()
+}
+})
+}
+
+function stopSession(sessionId) {
+
+fetch(`/teacher/stop-session/${sessionId}/`, {
+method: "POST",
+headers: {
+"Content-Type": "application/json",
+"X-CSRFToken": "{{ csrf_token }}"
+}
+})
+.then(response => response.json())
+.then(data => {
+if (data.success){
+alert("Session Stopped")
+location.reload()
+}
+})
+}
+</script>
+
+{% endblock %}

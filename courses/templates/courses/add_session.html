@@ -1,0 +1,46 @@
+{% extends "courses/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>Add Session to {{ course.title }}</h2>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label>Title</label>
+        {{ form.title }}
+    </div>
+
+    <div class="mb-3">
+        <label>Date</label>
+        {{ form.scheduled_date }}
+    </div>
+
+    <div class="mb-3">
+        <label>Start Time</label>
+        {{ form.start_time }}
+    </div>
+
+    <div class="mb-3">
+        <label>End Time</label>
+        {{ form.end_time }}
+    </div>
+
+    <div class="mb-3">
+        <label>Meeting Room</label>
+        {{ form.meeting_room }}
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Add Session
+    </button>
+
+</form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "courses/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Course Title -->
+    <h2>{{ course.title }}</h2>
+    <hr>
+
+    <!-- ============================= -->
+    <!-- MODULES SECTION -->
+    <!-- ============================= -->
+
+    <h4>📚 Modules</h4>
+
+    <a href="{% url 'add_module' course.id %}"
+       class="btn btn-primary btn-sm mb-3">
+       Add Module
+    </a>
+
+    {% if modules %}
+        {% for module in modules %}
+            <div class="card mb-2 p-2">
+                {{ module.order }}. {{ module.title }}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No modules added yet.</p>
+    {% endif %}
+
+
+    <hr>
+
+
+    <!-- ============================= -->
+    <!-- SESSIONS SECTION -->
+    <!-- ============================= -->
+
+    <h4>🎥 Live Sessions</h4>
+
+    <a href="{% url 'add_session' course.id %}"
+       class="btn btn-primary btn-sm mb-3">
+       Add Session
+    </a>
+
+
+    {% if sessions %}
+        {% for session in sessions %}
+
+            <div class="card mb-3 p-3">
+
+                <strong>{{ session.title }}</strong><br>
+
+                Date: {{ session.scheduled_date }}<br>
+
+                Time: {{ session.start_time }} - {{ session.end_time }}<br><br>
+
+
+                {% if session.is_active %}
+
+                    <!-- LIVE STATUS -->
+                    <span class="badge bg-success mb-2">
+                        LIVE
+                    </span><br>
+
+                    <!-- ENTER CLASS BUTTON -->
+                    <a href="{% url 'live_class' session.id %}"
+                       class="btn btn-success btn-sm">
+                        Enter Class
+                    </a>
+
+
+                    <!-- END SESSION BUTTON -->
+                    <form method="POST"
+                          action="{% url 'toggle_session' session.id %}"
+                          style="display:inline;">
+                        {% csrf_token %}
+
+                        <input type="hidden"
+                               name="action"
+                               value="end">
+
+                        <button class="btn btn-danger btn-sm">
+                            End Session
+                        </button>
+
+                    </form>
+
+
+                {% else %}
+
+                    <!-- START SESSION BUTTON -->
+                    <form method="POST"
+                          action="{% url 'toggle_session' session.id %}">
+
+                        {% csrf_token %}
+
+                        <input type="hidden"
+                               name="action"
+                               value="start">
+                        <a href="{% url 'live_class' session.id %}"
+                            class="btn btn-success">
+
+                            Start Live Class
+
+                        </a>
+                        
+                        
+                    </form>
+
+                {% endif %}
+                        <a href="{% url 'teacher_live_panel' session.id %}"
+                            class="btn btn-warning">
+
+                            Control Panel
+
+                        </a>
+            </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <p>No sessions added yet.</p>
+
+    {% endif %}
+
+</div>
+
+
+{% endblock %}

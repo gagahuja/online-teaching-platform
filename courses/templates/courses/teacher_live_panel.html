@@ -1,0 +1,42 @@
+{% extends "courses/base.html" %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h3>Live Class Control Panel</h3>
+
+<a href="{% url 'live_class' session.id %}"
+class="btn btn-success mb-3">
+
+Enter Classroom
+
+</a>
+
+<h5>Students in class:</h5>
+
+<ul class="list-group">
+
+{% for record in attendance %}
+
+<li class="list-group-item">
+
+{{ record.student.user.username }}
+
+</li>
+
+{% empty %}
+
+<li class="list-group-item">
+
+No students yet
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+{% endblock %}

@@ -69,8 +69,10 @@
 
                     {% if session.is_active %}
                         <a href="{% url 'live_class' session.id %}"
-                           class="btn btn-success btn-sm">
-                            Join Live
+                        class="btn btn-primary">
+
+                        Join Live Class
+
                         </a>
                     {% else %}
                         <span class="badge bg-secondary">Not Live</span>
