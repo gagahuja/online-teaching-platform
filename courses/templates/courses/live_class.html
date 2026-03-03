@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 {% extends "courses/base.html" %}
 
 {% block content %}
@@ -145,8 +146,10 @@ const api = new JitsiMeetExternalAPI(domain, options);
 
 const sessionId = "{{ session.id }}";
 
+const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+
 const socket = new WebSocket(
-    "ws://" + window.location.host + "/ws/classroom/" + sessionId + "/"
+    protocol + window.location.host + "/ws/classroom/" + sessionId + "/"
 );
 
 socket.onmessage = function(e) {
