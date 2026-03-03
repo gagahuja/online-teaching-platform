@@ -155,12 +155,28 @@ socket.onmessage = function(e) {
 
     const chatBox = document.getElementById("chat-box");
 
-    chatBox.innerHTML +=
-        "<div><b>" +
-        data.username +
-        ":</b> " +
-        data.message +
-        "</div>";
+    if (data.type === "chat") {
+        chatBox.innerHTML +=
+            "<div><b>" +
+            data.username +
+            ":</b> " +
+            data.message +
+            "</div>";
+    }
+
+    if (data.type === "join") {
+        chatBox.innerHTML +=
+            "<div style='color:green;'>🟢 " +
+            data.username +
+            " joined</div>";
+    }
+
+    if (data.type === "leave") {
+        chatBox.innerHTML +=
+            "<div style='color:red;'>🔴 " +
+            data.username +
+            " left</div>";
+    }
 
     chatBox.scrollTop = chatBox.scrollHeight;
 };
