@@ -28,7 +28,8 @@ User: {{ request.user.username }} ({{ user_role }})
         <div class="col-md-9">
             <!-- Video already here -->
         </div>
-
+        <h3>👥 Live Attendance</h3>
+        <ul id="attendance-list"></ul>
         <div class="col-md-3">
 
             <div class="card">
@@ -38,9 +39,7 @@ User: {{ request.user.username }} ({{ user_role }})
                 </div>
                 <button onclick="raiseHand()">✋ Raise Hand</button>
 
-                <h3>👥 Live Attendance</h3>
-                <ul id="attendance-list"></ul>
-
+                
                 <div class="card-body"
                      id="chat-box"
                      style="height:300px; overflow-y:auto;">
