@@ -37,13 +37,20 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             if self.username in ClassroomConsumer.active_users[self.room_group_name]:
                 ClassroomConsumer.active_users[self.room_group_name].remove(self.username)
 
+        # Send attendance to everyone
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "attendance_update",
-                "users": ClassroomConsumer.active_users.get(self.room_group_name, [])
+                "users": ClassroomConsumer.active_users[self.room_group_name]
             }
         )
+
+        # Also send attendance directly to the new user
+        await self.send(text_data=json.dumps({
+            "type": "attendance",
+            "users": ClassroomConsumer.active_users[self.room_group_name]
+        }))
 
         await self.channel_layer.group_discard(
             self.room_group_name,
