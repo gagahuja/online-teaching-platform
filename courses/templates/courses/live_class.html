@@ -27,12 +27,12 @@ User: {{ request.user.username }} ({{ user_role }})
 
         <div class="col-md-9">
 
-        <!-- VIDEO -->
         <div id="jitsi-container" style="height:75vh;"></div>
 
-        <!-- ATTENDANCE -->
-        <h4 class="mt-3">👥 Live Attendance</h4>
-        <ul id="attendance-list"></ul>
+        <div class="mt-3">
+            <h4>👥 Live Attendance</h4>
+            <ul id="attendance-list"></ul>
+        </div>
 
     </div>
 
@@ -165,46 +165,42 @@ socket.onmessage = function(e) {
 
     const data = JSON.parse(e.data);
 
-    const chatBox = document.getElementById("chat-box");
+    console.log("WebSocket message:", data); // debug line
 
-    // CHAT MESSAGE
+    const chatBox = document.getElementById("chat-box");
+    const attendanceList = document.getElementById("attendance-list");
+
+    if (!attendanceList) return;
+
+    // CHAT
     if (data.type === "chat") {
         chatBox.innerHTML +=
-            "<div><b>" +
-            data.username +
-            ":</b> " +
-            data.message +
-            "</div>";
-
+            "<div><b>" + data.username + ":</b> " + data.message + "</div>";
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     // RAISE HAND
     if (data.type === "hand") {
         chatBox.innerHTML +=
-            "<div style='color:orange;'>✋ " +
-            data.username +
-            " raised their hand</div>";
+            "<div style='color:orange;'>✋ " + data.username + " raised their hand</div>";
     }
 
-    // ATTENDANCE UPDATE
+    // ATTENDANCE
     if (data.type === "attendance") {
 
-        const list = document.getElementById("attendance-list");
-
-        list.innerHTML = "";
+        attendanceList.innerHTML = "";
 
         data.users.forEach(function(user) {
 
             const li = document.createElement("li");
+            li.innerHTML = "🟢 " + user;
 
-            li.textContent = "🟢 " + user;
-
-            list.appendChild(li);
+            attendanceList.appendChild(li);
 
         });
 
     }
+
 };
 
 
