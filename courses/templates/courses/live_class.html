@@ -104,6 +104,8 @@ enableWelcomePage: false,
 
 enableClosePage: false,
 
+disableDeepLinking: true,
+
 prejoinPageEnabled: true
 
 },
@@ -113,6 +115,8 @@ interfaceConfigOverwrite: {
 SHOW_JITSI_WATERMARK: false,
 
 SHOW_BRAND_WATERMARK: false,
+
+MOBILE_APP_PROMO: false,
 
 TOOLBAR_BUTTONS: [
 
@@ -148,6 +152,8 @@ TOOLBAR_BUTTONS: [
 
 const api = new JitsiMeetExternalAPI(domain, options);
 
+const userRole = "{{ user_role }}";
+
 </script>
 
 
@@ -172,6 +178,23 @@ socket.onmessage = function(e) {
 
     if (!attendanceList) return;
 
+    <div id="teacher-controls" style="display:none;" class="mb-3">
+
+    <h5>Teacher Controls</h5>
+
+    <button onclick="endClass()" class="btn btn-danger w-100 mb-2">
+    End Class
+    </button>
+
+    <button onclick="lockClass()" class="btn btn-warning w-100 mb-2">
+    Lock Classroom
+    </button>
+
+    </div>
+
+    if (userRole === "teacher") {
+    document.getElementById("teacher-controls").style.display = "block";
+    }
     // CHAT
     if (data.type === "chat") {
         chatBox.innerHTML +=
@@ -209,6 +232,14 @@ socket.onmessage = function(e) {
 
     }
 
+    if (data.type === "class_end") {
+
+            alert("Class ended by teacher");
+
+            window.location.href = "/dashboard/";
+
+        }
+
 };
 
 
@@ -235,5 +266,12 @@ function raiseHand() {
 
 }
 
+function endClass(){
+
+    socket.send(JSON.stringify({
+        type:"end_class"
+    }));
+
+}
 </script>
 {% endblock %}

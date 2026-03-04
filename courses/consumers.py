@@ -80,6 +80,15 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
                     "username": data["username"]
                 }
             )
+        
+        if data["type"] == "end_class":
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "class_ended"
+                }
+            )
 
     async def chat_message(self, event):
 
@@ -101,4 +110,10 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "attendance",
             "users": event["users"]
+        }))
+    
+    async def class_ended(self, event):
+
+        await self.send(text_data=json.dumps({
+            "type": "class_end"
         }))
