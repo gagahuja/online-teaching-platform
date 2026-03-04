@@ -188,11 +188,19 @@ socket.onmessage = function(e) {
     // ATTENDANCE
     if (data.type === "attendance") {
 
+        const attendanceList = document.getElementById("attendance-list");
+
+        if (!attendanceList) {
+            console.log("Attendance list not found");
+            return;
+        }
+
         attendanceList.innerHTML = "";
 
-        data.users.forEach(function(user) {
+        data.users.forEach(user => {
 
             const li = document.createElement("li");
+
             li.innerHTML = "🟢 " + user;
 
             attendanceList.appendChild(li);
