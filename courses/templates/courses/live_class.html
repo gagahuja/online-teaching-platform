@@ -160,9 +160,10 @@ socket.onmessage = function(e) {
 
     const data = JSON.parse(e.data);
 
-    if (data.type === "chat") {
-        const chatBox = document.getElementById("chat-box");
+    const chatBox = document.getElementById("chat-box");
 
+    // CHAT MESSAGE
+    if (data.type === "chat") {
         chatBox.innerHTML +=
             "<div><b>" +
             data.username +
@@ -173,27 +174,30 @@ socket.onmessage = function(e) {
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
+    // RAISE HAND
+    if (data.type === "hand") {
+        chatBox.innerHTML +=
+            "<div style='color:orange;'>✋ " +
+            data.username +
+            " raised their hand</div>";
+    }
+
+    // ATTENDANCE UPDATE
     if (data.type === "attendance") {
 
         const list = document.getElementById("attendance-list");
+
         list.innerHTML = "";
 
         data.users.forEach(function(user) {
+
             const li = document.createElement("li");
+
             li.textContent = "🟢 " + user;
+
             list.appendChild(li);
+
         });
-
-    }
-
-    if (data.type === "hand") {
-
-    const chatBox = document.getElementById("chat-box");
-
-    chatBox.innerHTML +=
-        "<div style='color:orange;'>✋ " +
-        data.username +
-        " raised their hand</div>";
 
     }
 };
