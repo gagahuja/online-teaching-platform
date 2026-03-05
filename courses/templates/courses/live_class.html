@@ -232,7 +232,17 @@ socket.onmessage = function(e) {
 
             const li = document.createElement("li");
 
-            li.innerHTML = "🟢 " + user;
+            if(userRole === "teacher" && user !== "{{ request.user.username }}"){
+
+                li.innerHTML =
+                "🟢 " + user +
+                " <button onclick='removeStudent(\""+user+"\")' class='btn btn-sm btn-danger'>Remove</button>";
+
+            } else {
+
+                li.innerHTML = "🟢 " + user;
+
+            }
 
             attendanceList.appendChild(li);
 
@@ -278,6 +288,17 @@ function endClass(){
 
     socket.send(JSON.stringify({
         type:"end_class"
+    }));
+
+}
+
+function removeStudent(username){
+
+    socket.send(JSON.stringify({
+
+        type: "remove_student",
+        username: username
+
     }));
 
 }
