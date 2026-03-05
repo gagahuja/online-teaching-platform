@@ -80,6 +80,16 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
                     "username": data["username"]
                 }
             )
+
+        if data["type"] == "remove_student":
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "student_removed",
+                    "username": data["username"]
+                }
+            )
         
         if data["type"] == "end_class":
 
@@ -104,6 +114,14 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             "type": "hand",
             "username": event["username"]
         }))
+
+        async def student_removed(self, event):
+
+            if self.username == event["username"]:
+
+                await self.send(text_data=json.dumps({
+                "type": "removed"
+            }))
 
     async def attendance_update(self, event):
 

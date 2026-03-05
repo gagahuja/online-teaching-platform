@@ -250,6 +250,14 @@ socket.onmessage = function(e) {
 
     }
 
+    if(data.type === "removed"){
+
+        alert("You were removed from class by teacher");
+
+        window.location.href = "/";
+
+    }
+    
     if (data.type === "class_end") {
 
             alert("Class ended by teacher");
