@@ -1,5 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from .models import Attendance, ClassSession
+from django.utils import timezone
 
 
 class ClassroomConsumer(AsyncWebsocketConsumer):
@@ -17,6 +19,13 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+
+        session = await ClassSession.objects.aget(id=self.session_id)
+
+        await Attendance.objects.acreate(
+            student=self.scope["user"],
+            session=session
+        )
 
         if self.room_group_name not in ClassroomConsumer.active_users:
             ClassroomConsumer.active_users[self.room_group_name] = []
@@ -45,6 +54,17 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             }
         )
 
+
+        attendance = await Attendance.objects.filter(
+            student=self.scope["user"],
+            session_id=self.session_id,
+            leave_time__isnull=True
+        ).afirst()
+
+        if attendance:
+            attendance.leave_time = timezone.now()
+            await attendance.asave()
+            
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name

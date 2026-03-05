@@ -126,3 +126,19 @@ class ModuleProgress(models.Model):
 
     def __str__(self):
         return f"{self.student.user.username} - {self.module.title}"
+
+
+from django.db import models
+from django.contrib.auth.models import User
+
+
+class Attendance(models.Model):
+
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    session = models.ForeignKey("ClassSession", on_delete=models.CASCADE)
+
+    join_time = models.DateTimeField(auto_now_add=True)
+    leave_time = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.student.username} - {self.session.title}"

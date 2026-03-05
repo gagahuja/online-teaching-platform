@@ -46,7 +46,7 @@ class EnrollmentAdmin(admin.ModelAdmin):
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('student', 'session', 'joined_at')
+    list_display = ('student', 'session', 'join_time', 'leave_time')
     list_filter = ('session',)
 
 
