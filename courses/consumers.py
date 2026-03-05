@@ -37,7 +37,6 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             if self.username in ClassroomConsumer.active_users[self.room_group_name]:
                 ClassroomConsumer.active_users[self.room_group_name].remove(self.username)
 
-        # Send attendance to everyone
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -45,12 +44,6 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
                 "users": ClassroomConsumer.active_users[self.room_group_name]
             }
         )
-
-        # Also send attendance directly to the new user
-        await self.send(text_data=json.dumps({
-            "type": "attendance",
-            "users": ClassroomConsumer.active_users[self.room_group_name]
-        }))
 
         await self.channel_layer.group_discard(
             self.room_group_name,
@@ -71,7 +64,7 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-        if data["type"] == "raise_hand":
+        elif data["type"] == "raise_hand":
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -81,7 +74,7 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-        if data["type"] == "remove_student":
+        elif data["type"] == "remove_student":
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -90,8 +83,8 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
                     "username": data["username"]
                 }
             )
-        
-        if data["type"] == "end_class":
+
+        elif data["type"] == "end_class":
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -115,11 +108,11 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             "username": event["username"]
         }))
 
-        async def student_removed(self, event):
+    async def student_removed(self, event):
 
-            if self.username == event["username"]:
+        if self.username == event["username"]:
 
-                await self.send(text_data=json.dumps({
+            await self.send(text_data=json.dumps({
                 "type": "removed"
             }))
 
@@ -129,7 +122,7 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             "type": "attendance",
             "users": event["users"]
         }))
-    
+
     async def class_ended(self, event):
 
         await self.send(text_data=json.dumps({
