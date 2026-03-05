@@ -44,6 +44,7 @@ urlpatterns = [
     path('teacher/session/<int:session_id>/toggle/', views.toggle_session_status, name='toggle_session_status'),
     path("teacher/start-session/<int:session_id>/", views.start_session, name="start_session"),
     path("teacher/stop-session/<int:session_id>/", views.stop_session, name="stop_session"),
+    path('teacher/attendance/<int:session_id>/', views.attendance_report, name='attendance_report'),
 ]
 
 

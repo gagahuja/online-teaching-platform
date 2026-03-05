@@ -710,3 +710,19 @@ def stop_session(request, session_id):
         })
 
     return JsonResponse({"success": False})
+
+
+from courses.models import Attendance, ClassSession
+from django.shortcuts import render
+
+
+def attendance_report(request, session_id):
+
+    session = ClassSession.objects.get(id=session_id)
+
+    records = Attendance.objects.filter(session=session)
+
+    return render(request, "courses/attendance.html", {
+        "session": session,
+        "records": records
+    })
