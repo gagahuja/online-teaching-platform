@@ -38,7 +38,27 @@ User: {{ request.user.username }} ({{ user_role }})
 
     <div class="col-md-3">
 
-            <div class="card">
+        <div id="teacher-controls" class="mb-3" style="display:none;">
+
+        <div class="card border-danger">
+
+        <div class="card-header bg-danger text-white">
+        Teacher Controls
+        </div>
+
+        <div class="card-body">
+
+        <button onclick="endClass()" class="btn btn-danger w-100">
+        End Class For Everyone
+        </button>
+
+        </div>
+
+        </div>
+
+        </div>
+
+    <div class="card">
 
                 <div class="card-header">
                     Live Chat
@@ -154,6 +174,10 @@ const api = new JitsiMeetExternalAPI(domain, options);
 
 const userRole = "{{ user_role }}";
 
+if(userRole === "teacher"){
+    document.getElementById("teacher-controls").style.display = "block";
+}
+
 </script>
 
 
@@ -178,23 +202,7 @@ socket.onmessage = function(e) {
 
     if (!attendanceList) return;
 
-    <div id="teacher-controls" style="display:none;" class="mb-3">
-
-    <h5>Teacher Controls</h5>
-
-    <button onclick="endClass()" class="btn btn-danger w-100 mb-2">
-    End Class
-    </button>
-
-    <button onclick="lockClass()" class="btn btn-warning w-100 mb-2">
-    Lock Classroom
-    </button>
-
-    </div>
-
-    if (userRole === "teacher") {
-    document.getElementById("teacher-controls").style.display = "block";
-    }
+    
     // CHAT
     if (data.type === "chat") {
         chatBox.innerHTML +=
