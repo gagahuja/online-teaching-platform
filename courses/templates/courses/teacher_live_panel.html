@@ -19,6 +19,8 @@ Enter Classroom
 
 {% for record in attendance %}
 
+Attendance.objects.filter(session=session)
+
 <li class="list-group-item">
 
 {{ record.student.user.username }}
