@@ -38,7 +38,7 @@ def live_class(request, session_id):
     # Attendance auto log
     if profile.role == "student":
         Attendance.objects.get_or_create(
-            student=profile,
+            student=request.user,
             session=session
         )
 
