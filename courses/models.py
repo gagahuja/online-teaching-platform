@@ -137,7 +137,7 @@ class Attendance(models.Model):
     student = models.ForeignKey(User, on_delete=models.CASCADE)
     session = models.ForeignKey("ClassSession", on_delete=models.CASCADE)
 
-    join_time = models.DateTimeField(auto_now_add=True)
+    join_time = models.DateTimeField(null=True, blank=True)
     leave_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
