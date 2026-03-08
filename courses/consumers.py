@@ -40,35 +40,41 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
             }
         )
 
-    async def disconnect(self, close_code):
+async def disconnect(self, close_code):
 
-        if self.room_group_name in ClassroomConsumer.active_users:
-            if self.username in ClassroomConsumer.active_users[self.room_group_name]:
-                ClassroomConsumer.active_users[self.room_group_name].remove(self.username)
+    from django.utils import timezone
+    from courses.models import Attendance
 
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                "type": "attendance_update",
-                "users": ClassroomConsumer.active_users[self.room_group_name]
-            }
-        )
+    if self.room_group_name in ClassroomConsumer.active_users:
+        if self.username in ClassroomConsumer.active_users[self.room_group_name]:
+            ClassroomConsumer.active_users[self.room_group_name].remove(self.username)
 
+    # update leave time
+    try:
+        attendance = Attendance.objects.filter(
+            student__username=self.username,
+            session_id=self.session_id
+        ).last()
 
-        attendance = await Attendance.objects.filter(
-            student=self.scope["user"],
-            session_id=self.session_id,
-            leave_time__isnull=True
-        ).afirst()
-
-        if attendance:
+        if attendance and not attendance.leave_time:
             attendance.leave_time = timezone.now()
-            await attendance.asave()
-            
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+            attendance.save()
+
+    except Exception as e:
+        print("Attendance leave error:", e)
+
+    await self.channel_layer.group_send(
+        self.room_group_name,
+        {
+            "type": "attendance_update",
+            "users": ClassroomConsumer.active_users.get(self.room_group_name, [])
+        }
+    )
+
+    await self.channel_layer.group_discard(
+        self.room_group_name,
+        self.channel_name
+    )
 
     async def receive(self, text_data):
         data = json.loads(text_data)

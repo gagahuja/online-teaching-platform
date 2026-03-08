@@ -18,14 +18,24 @@
 
 <tr>
 <th>Student</th>
-<th>Joined At</th>
+<th>Join</th>
+<th>Leave</th>
+<th>Duration</th>
 </tr>
 
 {% for record in session.records %}
 
 <tr>
 <td>{{ record.student.username }}</td>
-<td>{{ record.joined_at }}</td>
+<td>{{ record.join_time }}</td>
+<td>{{ record.leave_time }}</td>
+<td>
+{% if record.leave_time %}
+{{ record.leave_time|timesince:record.join_time }}
+{% else %}
+In Class
+{% endif %}
+</td>
 </tr>
 
 {% endfor %}
