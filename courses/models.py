@@ -98,7 +98,7 @@ class Enrollment(models.Model):
 class Attendance(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE)
     session = models.ForeignKey(ClassSession, on_delete=models.CASCADE)
-    joined_at = models.DateTimeField(auto_now_add=True)
+    joined_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def __str__(self):
         return f"{self.student.user.username} - {self.session.title}"
