@@ -1,4 +1,5 @@
 from sys import modules
+from urllib import request
 
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -13,6 +14,7 @@ from django.http import JsonResponse
 from courses.models import Module, ModuleProgress
 from reportlab.pdfgen import canvas
 from django.shortcuts import render, redirect
+from django.utils import timezone
 
 import json
 
@@ -39,7 +41,8 @@ def live_class(request, session_id):
     if profile.role == "student":
         Attendance.objects.get_or_create(
             student=request.user,
-            session=session
+            session=session,
+            defaults={"joined_at": timezone.now()}
         )
 
     meeting_name = f"ScoreSkill_{session.course.id}_{session.id}"
