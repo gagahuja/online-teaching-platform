@@ -42,7 +42,7 @@ def live_class(request, session_id):
         Attendance.objects.get_or_create(
             student=request.user,
             session=session,
-            defaults={"joined_at": timezone.now()}
+            defaults={"join_time": timezone.now()}
         )
 
     meeting_name = f"ScoreSkill_{session.course.id}_{session.id}"
