@@ -60,3 +60,42 @@ def live_class(request, session_id):
     }
 
     return render(request, "courses/live_class.html", context)
+
+
+
+import json
+from django.http import JsonResponse
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import Attendance
+
+
+@csrf_exempt  # required for sendBeacon
+@login_required
+def leave_class(request):
+
+    if request.method == "POST":
+
+        try:
+            data = json.loads(request.body)
+
+            session_id = data.get("session_id")
+
+            attendance = Attendance.objects.filter(
+                student=request.user,
+                session_id=session_id,
+                leave_time__isnull=True
+            ).last()
+
+            if attendance:
+                attendance.leave_time = timezone.now()
+                attendance.save()
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)})
+
+    return JsonResponse({"error": "Invalid request"})

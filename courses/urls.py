@@ -30,3 +30,10 @@ urlpatterns = [
          views.add_session,
          name='add_session'),
 ]
+
+
+from .views import leave_class
+
+urlpatterns += [
+    path('leave-class/', leave_class, name='leave_class'),
+]

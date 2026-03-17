@@ -1,71 +1,53 @@
-<!DOCTYPE html>
 {% extends "courses/base.html" %}
 
 {% block content %}
 
 <div class="container-fluid p-0">
 
-<div class="bg-dark text-white p-2 d-flex justify-content-between">
-
-<span>
-Class: {{ session.title }}
-</span>
-
-<span>
-User: {{ request.user.username }} ({{ user_role }})
-</span>
-
-</div>
-
-<div id="jitsi-container" style="height:92vh;"></div>
-
-</div>
-
-<div class="container-fluid mt-2">
+    <!-- HEADER -->
+    <div class="bg-dark text-white p-2 d-flex justify-content-between">
+        <span>Class: {{ session.title }}</span>
+        <span>User: {{ request.user.username }} ({{ user_role }})</span>
+    </div>
 
     <div class="row">
 
+        <!-- VIDEO SECTION -->
         <div class="col-md-9">
+            <div id="jitsi-container" style="height:75vh;"></div>
 
-        <div id="jitsi-container" style="height:75vh;"></div>
-
-        <div class="mt-3">
-            <h4>👥 Live Attendance</h4>
-            <ul id="attendance-list"></ul>
+            <div class="mt-3">
+                <h4>👥 Live Attendance</h4>
+                <ul id="attendance-list"></ul>
+            </div>
         </div>
 
-    </div>
+        <!-- SIDE PANEL -->
+        <div class="col-md-3">
 
-    <div class="col-md-3">
-
-        <div id="teacher-controls" class="mb-3" style="display:none;">
-
-        <div class="card border-danger">
-
-        <div class="card-header bg-danger text-white">
-        Teacher Controls
-        </div>
-
-        <div class="card-body">
-
-        <button onclick="endClass()" class="btn btn-danger w-100">
-        End Class For Everyone
-        </button>
-
-        </div>
-
-        </div>
-
-        </div>
-
-    <div class="card">
-
-                <div class="card-header">
-                    Live Chat
+            <!-- TEACHER CONTROLS -->
+            <div id="teacher-controls" class="mb-3" style="display:none;">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        Teacher Controls
+                    </div>
+                    <div class="card-body">
+                        <button onclick="endClass()" class="btn btn-danger w-100">
+                            End Class For Everyone
+                        </button>
+                    </div>
                 </div>
-                <button onclick="raiseHand()">✋ Raise Hand</button>
+            </div>
 
-                
+            <!-- CHAT -->
+            <div class="card">
+
+                <div class="card-header">Live Chat</div>
+
+                <button onclick="raiseHand()" class="btn btn-warning m-2">
+                    ✋ Raise Hand
+                </button>
+
                 <div class="card-body"
                      id="chat-box"
                      style="height:300px; overflow-y:auto;">
@@ -93,81 +75,36 @@ User: {{ request.user.username }} ({{ user_role }})
 
 </div>
 
+<!-- JITSI -->
 <script src="https://meet.jit.si/external_api.js"></script>
 
 <script>
 
 const domain = "meet.jit.si";
 
+const roomName = "{{ meeting_name|default:'ScoreSkill_'|add:session.id }}";
+
 const options = {
+    roomName: roomName,
+    width: "100%",
+    height: "100%",
+    parentNode: document.querySelector('#jitsi-container'),
 
-roomName: "{{ meeting_name }}",
+    userInfo: {
+        displayName: "{{ request.user.username }}"
+    },
 
-width: "100%",
-height: "100%",
+    configOverwrite: {
+        startWithAudioMuted: false,
+        startWithVideoMuted: false,
+        enableWelcomePage: false,
+        prejoinPageEnabled: true
+    },
 
-parentNode: document.querySelector('#jitsi-container'),
-
-userInfo: {
-
-displayName: "{{ request.user.username }}"
-
-},
-
-configOverwrite: {
-
-startWithAudioMuted: false,
-
-startWithVideoMuted: false,
-
-enableWelcomePage: false,
-
-enableClosePage: false,
-
-disableDeepLinking: true,
-
-prejoinPageEnabled: true
-
-},
-
-interfaceConfigOverwrite: {
-
-SHOW_JITSI_WATERMARK: false,
-
-SHOW_BRAND_WATERMARK: false,
-
-MOBILE_APP_PROMO: false,
-
-TOOLBAR_BUTTONS: [
-
-'microphone',
-
-'camera',
-
-'closedcaptions',
-
-'desktop',
-
-'fullscreen',
-
-'fodeviceselection',
-
-'hangup',
-
-'chat',
-
-'recording',
-
-'raisehand',
-
-'tileview',
-
-'select-background'
-
-]
-
-}
-
+    interfaceConfigOverwrite: {
+        SHOW_JITSI_WATERMARK: false,
+        SHOW_BRAND_WATERMARK: false
+    }
 };
 
 const api = new JitsiMeetExternalAPI(domain, options);
@@ -180,7 +117,7 @@ if(userRole === "teacher"){
 
 </script>
 
-
+<!-- WEBSOCKET -->
 <script>
 
 const sessionId = "{{ session.id }}";
@@ -195,36 +132,22 @@ socket.onmessage = function(e) {
 
     const data = JSON.parse(e.data);
 
-    console.log("WebSocket message:", data); // debug line
-
     const chatBox = document.getElementById("chat-box");
     const attendanceList = document.getElementById("attendance-list");
 
-    if (!attendanceList) return;
-
-    
     // CHAT
     if (data.type === "chat") {
-        chatBox.innerHTML +=
-            "<div><b>" + data.username + ":</b> " + data.message + "</div>";
+        chatBox.innerHTML += `<div><b>${data.username}:</b> ${data.message}</div>`;
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     // RAISE HAND
     if (data.type === "hand") {
-        chatBox.innerHTML +=
-            "<div style='color:orange;'>✋ " + data.username + " raised their hand</div>";
+        chatBox.innerHTML += `<div style="color:orange;">✋ ${data.username} raised hand</div>`;
     }
 
     // ATTENDANCE
     if (data.type === "attendance") {
-
-        const attendanceList = document.getElementById("attendance-list");
-
-        if (!attendanceList) {
-            console.log("Attendance list not found");
-            return;
-        }
 
         attendanceList.innerHTML = "";
 
@@ -233,15 +156,11 @@ socket.onmessage = function(e) {
             const li = document.createElement("li");
 
             if(userRole === "teacher" && user !== "{{ request.user.username }}"){
-
                 li.innerHTML =
-                "🟢 " + user +
-                " <button onclick='removeStudent(\""+user+"\")' class='btn btn-sm btn-danger'>Remove</button>";
-
+                    `🟢 ${user}
+                    <button onclick="removeStudent('${user}')" class="btn btn-sm btn-danger">Remove</button>`;
             } else {
-
-                li.innerHTML = "🟢 " + user;
-
+                li.innerHTML = `🟢 ${user}`;
             }
 
             attendanceList.appendChild(li);
@@ -251,64 +170,89 @@ socket.onmessage = function(e) {
     }
 
     if(data.type === "removed"){
-
         alert("You were removed from class by teacher");
-
         window.location.href = "/";
-
     }
-    
+
     if (data.type === "class_end") {
-
-            alert("Class ended by teacher");
-
-            window.location.href = "/dashboard/";
-
-        }
-
+        alert("Class ended by teacher");
+        window.location.href = "/dashboard/";
+    }
 };
 
-
+// SEND CHAT
 function sendMessage() {
 
     const input = document.getElementById("chat-input");
 
-    socket.send(JSON.stringify({
+    if(input.value.trim() === "") return;
 
+    socket.send(JSON.stringify({
+        type: "chat",
         message: input.value,
         username: "{{ request.user.username }}"
-
     }));
 
     input.value = "";
 }
 
+// RAISE HAND
 function raiseHand() {
-
     socket.send(JSON.stringify({
         type: "raise_hand",
         username: "{{ request.user.username }}"
     }));
-
 }
 
+// END CLASS
 function endClass(){
-
     socket.send(JSON.stringify({
         type:"end_class"
     }));
-
 }
 
+// REMOVE STUDENT
 function removeStudent(username){
-
     socket.send(JSON.stringify({
-
         type: "remove_student",
         username: username
-
     }));
-
 }
+
+// 🚀 AUTO LEAVE TRACKING (VERY IMPORTANT)
+function sendLeaveRequest() {
+
+    const data = JSON.stringify({
+        session_id: sessionId
+    });
+
+    // Try sendBeacon first (best)
+    if (navigator.sendBeacon) {
+        navigator.sendBeacon("/leave-class/", data);
+    } 
+    else {
+        // fallback for older browsers
+        fetch("/leave-class/", {
+            method: "POST",
+            body: data,
+            headers: {
+                "Content-Type": "application/json"
+            },
+            keepalive: true
+        });
+    }
+}
+
+// When tab is closed or refreshed
+window.addEventListener("beforeunload", sendLeaveRequest);
+
+// When tab becomes inactive (mobile / switch apps)
+document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "hidden") {
+        sendLeaveRequest();
+    }
+});
+
 </script>
+
 {% endblock %}
