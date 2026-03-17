@@ -19,42 +19,7 @@ from django.utils import timezone
 import json
 
 
-from courses.models import ClassSession, Attendance, StudentProfile
 
-@login_required
-def live_class(request, session_id):
-
-    session = get_object_or_404(ClassSession, id=session_id)
-
-    # Ensure profile exists
-    profile, _ = StudentProfile.objects.get_or_create(
-        user=request.user,
-        defaults={"role": "student"}
-    )
-
-    user_role = profile.role
-
-    # Safe attendance creation
-    attendance = Attendance.objects.filter(
-        student=request.user,
-        session=session
-    ).first()
-
-    if not attendance:
-        attendance = Attendance.objects.create(
-            student=request.user,
-            session=session,
-            join_time=timezone.now()
-        )
-
-    context = {
-        "session": session,
-        "attendance": attendance,
-        "user_role": user_role,
-        "meeting_name": f"ScoreSkill_{session.id}"
-    }
-
-    return render(request, "courses/live_class.html", context)
 
 
 @login_required
@@ -124,7 +89,7 @@ def course_attendance(request, course_id):
         records = []
         for record in attendance_records:
             records.append({
-                "student": record.student.user.username,
+                "student": record.student.username,
                 "joined_at": record.joined_at
             })
 

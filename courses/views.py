@@ -25,8 +25,8 @@ def download_attendance(request, session_id):
 
         writer.writerow([
             record.student.username,
-            record.join_time,
-            record.leave_time,
+            record.joined_at,
+            record.left_at,
             round(duration, 2) if duration else ""
         ])
 
@@ -55,7 +55,7 @@ def live_class(request, session_id):
         student=request.user,
         session=session,
         defaults={
-            "join_time": timezone.now()
+            "joined_at": timezone.now()
         }
     )
 
@@ -93,11 +93,11 @@ def leave_class(request):
             attendance = Attendance.objects.filter(
                 student=request.user,
                 session_id=session_id,
-                leave_time__isnull=True
+                left_at__isnull=True
             ).last()
 
             if attendance:
-                attendance.leave_time = timezone.now()
+                attendance.left_at = timezone.now()
                 attendance.save()
 
             return JsonResponse({"status": "success"})
