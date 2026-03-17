@@ -19,39 +19,43 @@ from django.utils import timezone
 import json
 
 
+from courses.models import ClassSession, Attendance, StudentProfile
+
 @login_required
 def live_class(request, session_id):
 
     session = get_object_or_404(ClassSession, id=session_id)
-    user = request.user
 
-    profile = StudentProfile.objects.get(user=user)
+    # Ensure profile exists
+    profile, _ = StudentProfile.objects.get_or_create(
+        user=request.user,
+        defaults={"role": "student"}
+    )
 
-    # Permission check
-    if profile.role == "student":
-        enrolled = Enrollment.objects.filter(
-            student=profile,
-            course=session.course
-        ).exists()
+    user_role = profile.role
 
-        if not enrolled:
-            return HttpResponseForbidden("Not enrolled")
+    # Safe attendance creation
+    attendance = Attendance.objects.filter(
+        student=request.user,
+        session=session
+    ).first()
 
-    # Attendance auto log
-    if profile.role == "student":
-        Attendance.objects.get_or_create(
+    if not attendance:
+        attendance = Attendance.objects.create(
             student=request.user,
             session=session,
-            defaults={"join_time": timezone.now()}
+            join_time=timezone.now()
         )
 
-    meeting_name = f"ScoreSkill_{session.course.id}_{session.id}"
-
-    return render(request, "courses/live_class.html", {
+    context = {
         "session": session,
-        "meeting_name": meeting_name,
-        "user_role": profile.role
-    })
+        "attendance": attendance,
+        "user_role": user_role,
+        "meeting_name": f"ScoreSkill_{session.id}"
+    }
+
+    return render(request, "courses/live_class.html", context)
+
 
 @login_required
 def home(request):
