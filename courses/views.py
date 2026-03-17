@@ -37,15 +37,20 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 
-from .models import ClassSession, Attendance
-
+from .models import ClassSession, Attendance, StudentProfile
 
 @login_required
 def live_class(request, session_id):
 
     session = get_object_or_404(ClassSession, id=session_id)
 
-    # create attendance when student joins
+    profile, created = StudentProfile.objects.get_or_create(
+        user=request.user,
+        defaults={"role": "student"}
+    )
+
+    user_role = profile.role
+
     attendance, created = Attendance.objects.get_or_create(
         student=request.user,
         session=session,
@@ -56,7 +61,9 @@ def live_class(request, session_id):
 
     context = {
         "session": session,
-        "attendance": attendance
+        "attendance": attendance,
+        "user_role": user_role,
+        "meeting_name": f"ScoreSkill_{session.id}"
     }
 
     return render(request, "courses/live_class.html", context)
