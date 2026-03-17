@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from . import views
+from django.http import HttpResponse
 
+def health(request):
+    return HttpResponse("OK")
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -45,6 +48,7 @@ urlpatterns = [
     path("teacher/start-session/<int:session_id>/", views.start_session, name="start_session"),
     path("teacher/stop-session/<int:session_id>/", views.stop_session, name="stop_session"),
     path('teacher/attendance/<int:session_id>/', views.attendance_report, name='attendance_report'),
+    path('health/', health),
 ]
 
 
