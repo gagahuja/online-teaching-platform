@@ -6,7 +6,7 @@ from django.utils import timezone
 
 class ClassroomConsumer(AsyncWebsocketConsumer):
 
-    active_users = {}
+    active_users = {}  # {room: {username: join_time}}
 
     async def connect(self):
         self.session_id = self.scope['url_route']['kwargs']['session_id']
@@ -20,54 +20,65 @@ class ClassroomConsumer(AsyncWebsocketConsumer):
 
         await self.accept()
 
-        session = await ClassSession.objects.aget(id=self.session_id)
-
-        await Attendance.objects.acreate(
-            student=self.scope["user"],
-            session=session
-        )
+        
 
         if self.room_group_name not in ClassroomConsumer.active_users:
-            ClassroomConsumer.active_users[self.room_group_name] = []
+            ClassroomConsumer.active_users[self.room_group_name] = {}
 
-        ClassroomConsumer.active_users[self.room_group_name].append(self.username)
+            ClassroomConsumer.active_users[self.room_group_name][self.username] = timezone.now().strftime("%H:%M:%S")
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "attendance_update",
-                "users": ClassroomConsumer.active_users[self.room_group_name]
+                "users": [
+                    {
+                        "username": username,
+                        "join_time": join_time
+                    }
+                    for username, join_time in ClassroomConsumer.active_users[self.room_group_name].items()
+                ]
             }
         )
 
+        
+
+from asgiref.sync import sync_to_async
+
 async def disconnect(self, close_code):
 
-    from django.utils import timezone
-    from courses.models import Attendance
-
     if self.room_group_name in ClassroomConsumer.active_users:
-        if self.username in ClassroomConsumer.active_users[self.room_group_name]:
-            ClassroomConsumer.active_users[self.room_group_name].remove(self.username)
+        ClassroomConsumer.active_users[self.room_group_name].pop(self.username, None)
 
-    # update leave time
-    try:
+    # ✅ SAFE DB UPDATE
+    @sync_to_async
+    def update_leave():
         attendance = Attendance.objects.filter(
             student__username=self.username,
-            session_id=self.session_id
+            session_id=self.session_id,
+            leave_time__isnull=True
         ).last()
 
-        if attendance and not attendance.leave_time:
+        if attendance:
             attendance.leave_time = timezone.now()
             attendance.save()
 
+    try:
+        await update_leave()
     except Exception as e:
-        print("Attendance leave error:", e)
+        print("Leave error:", e)
 
     await self.channel_layer.group_send(
         self.room_group_name,
         {
             "type": "attendance_update",
-            "users": ClassroomConsumer.active_users.get(self.room_group_name, [])
+            "users": [
+                {
+                    "username": username,
+                    "join_time": join_time
+                }
+                for username, join_time in ClassroomConsumer.active_users.get(self.room_group_name, {}).items()
+            ]
         }
     )
 

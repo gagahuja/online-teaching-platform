@@ -1,8 +1,9 @@
 from django.urls import path
-from core.views import live_class
-from core.views import home, live_class, toggle_session
-from core.views import home, live_class, toggle_session, course_attendance
+from .views import live_class, leave_class
+from core.views import home, toggle_session
+from core.views import course_attendance
 from .views import download_attendance
+from core.views import enroll_course
 
 urlpatterns = [
     path('', home, name='home'),               # 👈 HOME PAGE
@@ -10,7 +11,8 @@ urlpatterns = [
     path('toggle-session/<int:session_id>/', toggle_session, name='toggle_session'),
     path('attendance/<int:course_id>/', course_attendance, name='course_attendance'),
     path("attendance-report/<int:session_id>/",download_attendance,name="attendance_report"),
-   # path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
+    path('leave-class/', leave_class, name='leave_class'),
+    path('enroll/<int:course_id>/', enroll_course, name='enroll_course'),
 ]
 
 from django.urls import path

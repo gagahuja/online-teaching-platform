@@ -90,7 +90,7 @@ def course_attendance(request, course_id):
         for record in attendance_records:
             records.append({
                 "student": record.student.username,
-                "joined_at": record.joined_at
+                "join_time": record.join_time
             })
 
         sessions_data.append({

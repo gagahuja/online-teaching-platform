@@ -143,7 +143,19 @@ socket.onmessage = function(e) {
 
     // RAISE HAND
     if (data.type === "hand") {
-        chatBox.innerHTML += `<div style="color:orange;">✋ ${data.username} raised hand</div>`;
+
+        chatBox.innerHTML +=
+            "<div style='color:orange;font-weight:bold;'>✋ " + data.username + " raised hand</div>";
+
+        // highlight student
+        const items = document.querySelectorAll("#attendance-list li");
+
+        items.forEach(li => {
+            if(li.innerHTML.includes(data.username)){
+                li.style.backgroundColor = "#fff3cd";
+            }
+            });
+        }
     }
 
     // ATTENDANCE
@@ -155,12 +167,17 @@ socket.onmessage = function(e) {
 
             const li = document.createElement("li");
 
-            if(userRole === "teacher" && user !== "{{ request.user.username }}"){
+            if(userRole === "teacher"){
+
                 li.innerHTML =
-                    `🟢 ${user}
-                    <button onclick="removeStudent('${user}')" class="btn btn-sm btn-danger">Remove</button>`;
+                "🟢 <b>" + user.username + "</b>" +
+                " ⏱ Joined: " + user.join_time +
+                " <button onclick='removeStudent(\""+user.username+"\")' class='btn btn-sm btn-danger'>Remove</button>";
+
             } else {
-                li.innerHTML = `🟢 ${user}`;
+
+                li.innerHTML = "🟢 " + user.username;
+
             }
 
             attendanceList.appendChild(li);
@@ -178,7 +195,7 @@ socket.onmessage = function(e) {
         alert("Class ended by teacher");
         window.location.href = "/dashboard/";
     }
-};
+
 
 // SEND CHAT
 function sendMessage() {
@@ -255,4 +272,44 @@ document.addEventListener("visibilitychange", function () {
 
 </script>
 
+<script>
+window.addEventListener("beforeunload", function () {
+
+    const data = new FormData();
+    data.append("session_id", "{{ session.id }}");
+
+    navigator.sendBeacon("/leave-class/", data);
+
+});
+</script>
+
+
+<script>
+setInterval(() => {
+
+    const items = document.querySelectorAll("#attendance-list li");
+
+    items.forEach(li => {
+
+        const match = li.innerHTML.match(/Joined: (\d{2}:\d{2}:\d{2})/);
+
+        if(match){
+
+            const joinTime = match[1];
+
+            const now = new Date();
+            const join = new Date("1970-01-01T" + joinTime);
+
+            const minutes = Math.floor((now - join) / 1000 / 60);
+
+            li.innerHTML = li.innerHTML.replace(
+                /⏱ Joined: .*?/,
+                "⏱ " + minutes + " min"
+            );
+        }
+
+    });
+
+}, 60000);
+</script>
 {% endblock %}

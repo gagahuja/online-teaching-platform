@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from . import views
 from django.http import HttpResponse
+from courses.views import live_class
 
 def health(request):
     return HttpResponse("OK")
@@ -28,7 +29,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
     path('toggle-session/<int:session_id>/', views.toggle_session, name='toggle_session'),
-    path('live/<int:session_id>/', views.live_class, name='live_class'),
+    path('live/<int:session_id>/', live_class, name='live_class'),
     path('toggle-module/<int:module_id>/',views.toggle_module_completion,name='toggle_module_completion'),
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('certificate/<int:course_id>/',views.download_certificate,name='download_certificate'),

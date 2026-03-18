@@ -1,58 +1,44 @@
-{% extends "courses/base.html" %}
-
-{% block content %}
-
-<div class="container mt-4">
-
-<h2>Student Dashboard</h2>
+<h2>My Courses</h2>
 
 {% for item in course_sessions %}
+    <div class="card mb-3">
+        <div class="card-body">
 
-<div class="card mb-3">
+            <h4>{{ item.course.title }}</h4>
 
-<div class="card-body">
+            <p>{{ item.course.description }}</p>
 
-<h4>{{ item.course.title }}</h4>
+            <h5>Live Sessions</h5>
 
-<ul class="list-group">
+            {% for session in item.sessions %}
 
-{% for session in item.sessions %}
+                <div class="d-flex justify-content-between mb-2">
 
-<li class="list-group-item d-flex justify-content-between">
+                    <span>
+                        {{ session.title }} ({{ session.scheduled_date }})
+                    </span>
 
-<div>
-{{ session.title }}
-</div>
+                    {% if session.is_active %}
+                        <a href="{% url 'live_class' session.id %}" class="btn btn-success btn-sm">
+                            Join Live
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            Not Started
+                        </button>
+                    {% endif %}
 
-<a href="{% url 'live_class' session.id %}" class="btn btn-success btn-sm">
-Join Live Class
-</a>
+                </div>
 
-</li>
+            {% empty %}
+                <p>No sessions yet</p>
+            {% endfor %}
 
+        </div>
+    </div>
 {% empty %}
-
-<li class="list-group-item">
-No live sessions currently
-</li>
-
+    <p>No enrolled courses</p>
 {% endfor %}
-
-</ul>
-
-</div>
-</div>
-
-{% empty %}
-
-<p>You are not enrolled in any courses</p>
-
-{% endfor %}
-
-</div>
-
-{% endblock %}
-
 
 
 

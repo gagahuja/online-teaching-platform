@@ -1,6 +1,8 @@
 import csv
-from django.http import HttpResponse
-from .models import Attendance
+import profile
+from urllib import request
+from django.http import HttpResponse, HttpResponseForbidden
+from .models import Attendance, Enrollment
 
 
 def download_attendance(request, session_id):
@@ -25,7 +27,7 @@ def download_attendance(request, session_id):
 
         writer.writerow([
             record.student.username,
-            record.joined_at,
+            record.join_time,
             record.left_at,
             round(duration, 2) if duration else ""
         ])
@@ -44,10 +46,19 @@ def live_class(request, session_id):
 
     session = get_object_or_404(ClassSession, id=session_id)
 
-    profile, created = StudentProfile.objects.get_or_create(
-        user=request.user,
-        defaults={"role": "student"}
-    )
+    profile = StudentProfile.objects.get(user=request.user)
+
+    # 🚨 ACCESS CONTROL
+    if profile.role == "student":
+        is_enrolled = Enrollment.objects.filter(
+            student=profile,
+            course=session.course
+        ).exists()
+
+        if not is_enrolled:
+            return  HttpResponseForbidden("You are not enrolled in this course")
+
+    
 
     user_role = profile.role
 
@@ -55,7 +66,7 @@ def live_class(request, session_id):
         student=request.user,
         session=session,
         defaults={
-            "joined_at": timezone.now()
+            "join_time": timezone.now()
         }
     )
 
@@ -86,23 +97,28 @@ def leave_class(request):
     if request.method == "POST":
 
         try:
-            data = json.loads(request.body)
+            # 🔥 handle both JSON + beacon data
+            if request.body:
+                data = json.loads(request.body.decode('utf-8'))
+            else:
+                data = request.POST
 
             session_id = data.get("session_id")
 
             attendance = Attendance.objects.filter(
                 student=request.user,
                 session_id=session_id,
-                left_at__isnull=True
+                leave_time__isnull=True
             ).last()
 
             if attendance:
-                attendance.left_at = timezone.now()
+                attendance.leave_time = timezone.now()
                 attendance.save()
 
             return JsonResponse({"status": "success"})
 
         except Exception as e:
+            print("Leave error:", e)
             return JsonResponse({"error": str(e)})
 
     return JsonResponse({"error": "Invalid request"})

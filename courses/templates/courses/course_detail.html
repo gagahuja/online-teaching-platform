@@ -5,7 +5,15 @@
 
     <h2>{{ course.title }}</h2>
     <hr>
-
+    {% if not request.user.studentprofile.enrollment_set.filter(course=course).exists %}
+        <a href="{% url 'enroll_course' course.id %}" class="btn btn-success mb-3">
+            Enroll Now
+        </a>
+    {% else %}
+        <button class="btn btn-secondary mb-3" disabled>
+            Already Enrolled
+        </button>
+    {% endif %}
     <!-- Progress -->
     <div class="progress-bar bg-success"
         role="progressbar"

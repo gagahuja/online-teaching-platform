@@ -107,13 +107,12 @@ class Attendance(models.Model):
         related_name="attendance_records"
     )
 
-    joined_at = models.DateTimeField(default=timezone.now)  # ✅ USE THIS
-
-    left_at = models.DateTimeField(null=True, blank=True)
+    join_time = models.DateTimeField()
+    leave_time = models.DateTimeField(null=True, blank=True)
 
     def duration_minutes(self):
-        if self.left_at:
-            return (self.left_at - self.joined_at).total_seconds() / 60
+        if self.leave_time:
+            return (self.leave_time - self.join_time).total_seconds() / 60
         return None
 
     def __str__(self):
