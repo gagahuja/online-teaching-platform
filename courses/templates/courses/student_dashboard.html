@@ -2,35 +2,194 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<style>
+.container {
+    width: 90%;
+    margin: auto;
+}
 
-<h2>Student Dashboard</h2>
+.dashboard-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
 
-{% if enrollments %}
+/* COURSE CARD */
+.course-card {
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
 
-    {% for enrollment in enrollments %}
+.course-card:hover {
+    transform: translateY(-3px);
+}
 
-    <div class="card mb-3 p-3">
+/* HEADER */
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        <h5>{{ enrollment.course.title }}</h5>
+/* LIVE BADGE */
+.live-badge {
+    background: red;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
 
-        <a href="/course/{{ enrollment.course.id }}/"
-           class="btn btn-success">
+/* SESSION */
+.session-box {
+    background: #f7f9fc;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-Open Course
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+}
 
-        </a>
+.btn-primary { background: #3498db; color: white; }
+.btn-gray { background: #bdc3c7; color: white; }
 
-    </div>
+/* EMPTY */
+.empty {
+    color: gray;
+    font-style: italic;
+}
 
-    {% endfor %}
+.live-badge {
+    animation: blink 1s infinite;
+}
 
-{% else %}
+@keyframes blink {
+    50% { opacity: 0.5; }
+}
+</style>
+<div id="liveAlert" style="
+    display:none;
+    background:#e74c3c;
+    color:white;
+    padding:10px;
+    border-radius:8px;
+    margin-bottom:15px;
+">
+    🔴 Live Class Started! Join Now
+</div>
 
-<p>You are not enrolled in any course.</p>
+<div class="container">
 
-{% endif %}
+    <div class="dashboard-title">🎓 My Learning Dashboard</div>
+
+    {% if enrollments %}
+
+        {% for enrollment in enrollments %}
+
+        <div class="course-card">
+            <div style="margin-top:10px;">
+                <button class="btn btn-primary" style="background:#16a085;">
+                    🤖 Ask Doubt (AI)
+                </button>
+            </div>
+
+            <!-- COURSE HEADER -->
+            <div class="course-header">
+                <h3>{{ enrollment.course.title }}</h3>
+
+                <span class="live-badge">Active</span>
+            </div>
+
+            <p>{{ enrollment.course.description }}</p>
+
+            <!-- PROGRESS -->
+            <p><strong>Progress:</strong> 60%</p>
+
+            <div style="background:#eee; border-radius:10px; margin-bottom:15px;">
+                <div style="width:60%; background:#2ecc71; padding:6px; border-radius:10px;"></div>
+            </div>
+
+            <p><strong>Classes Attended:</strong> 8 / 12</p>
+
+            <hr>
+
+            <h4>📺 Live Classes</h4>
+
+            {% if enrollment.course.sessions.all %}
+
+                {% for session in enrollment.course.sessions.all %}
+
+                <div class="session-box">
+
+                    <div>
+                        <strong>{{ session.title }}</strong><br>
+                        {{ session.scheduled_date }} | {{ session.start_time }}
+                    </div>
+
+                    <div>
+                        {% if session.is_live %}
+
+                            <a href="{% url 'live_class' session.id %}" class="btn btn-primary">
+                                🚀 Join Live
+                            </a>
+
+                            <a href="{% url 'live_class' session.id %}" class="btn btn-primary" style="background:#8e44ad;">
+                                ▶ Continue
+                            </a>
+
+                        {% else %}
+
+                            <span class="btn btn-gray">Not Live</span>
+
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p class="empty">No sessions yet</p>
+
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="course-card">
+            <p class="empty">You are not enrolled in any course yet.</p>
+        </div>
+
+    {% endif %}
 
 </div>
+
+<script>
+setInterval(() => {
+    fetch("/check-live/")
+    .then(res => res.json())
+    .then(data => {
+        if(data.live){
+            document.getElementById("liveAlert").style.display = "block";
+        }
+    });
+}, 5000);
+</script>
 
 {% endblock %}

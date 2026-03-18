@@ -4,10 +4,8 @@
     <title>Score Skill</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f7fb;
         }
 
         .navbar {
@@ -31,9 +29,31 @@
         .card {
             background: white;
             padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
             margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+            color: white;
         }
 
         .button {
@@ -49,14 +69,23 @@
             background-color: #2980b9;
         }
 
+        .container {
+            width: 90%;
+            margin: auto;
+        }   
     </style>
 </head>
 <body>
 
 <div class="navbar">
-    <div>
-        <strong>Score Skill</strong>
-    </div>
+    <div style="background:#2c3e50; padding:15px; color:white;">
+        <b>ScoreSkill</b>
+
+        <span style="float:right;">
+            Welcome, {{ request.user.username }} |
+            <a href="/logout/" style="color:white;">Logout</a>
+        </span>
+    </div>>
     <div>
         {% if user.is_authenticated %}
             {{ user.username }} |

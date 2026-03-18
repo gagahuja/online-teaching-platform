@@ -2,93 +2,158 @@
 
 {% block content %}
 
-<div class="container mt-4">
+<style>
+.container {
+    width: 90%;
+    margin: auto;
+}
 
-<h2>Teacher Dashboard</h2>
+.dashboard-title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
 
-<a href="{% url 'create_course' %}" class="btn btn-primary mb-3">
-Create New Course
-</a>
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
 
-{% if course_sessions %}
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
 
-{% for item in course_sessions %}
+.course-title {
+    font-size: 20px;
+    font-weight: 600;
+}
 
-<div class="card mb-4 shadow-sm">
+.btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    margin-right: 5px;
+    border: none;
+    cursor: pointer;
+}
 
-<div class="card-body">
+.btn-primary { background: #3498db; color: white; }
+.btn-success { background: #2ecc71; color: white; }
+.btn-danger { background: #e74c3c; color: white; }
+.btn-warning { background: #f39c12; color: white; }
+.btn-secondary { background: #7f8c8d; color: white; }
 
-<h5>{{ item.course.title }}</h5>
+.session-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fb;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
 
-<a href="{% url 'manage_course' item.course.id %}">
-Manage Course
-</a>
+.session-info {
+    font-size: 14px;
+}
 
-<hr>
+.empty-text {
+    color: gray;
+    font-style: italic;
+}
+</style>
 
-<h6>Sessions</h6>
+<div class="container">
 
-<ul class="list-group">
+    <!-- HEADER -->
+    <div class="top-bar">
+        <div class="dashboard-title">👨‍🏫 Teacher Dashboard</div>
 
-{% if item.sessions %}
+        <a href="{% url 'create_course' %}" class="btn btn-primary">
+            ➕ Create Course
+        </a>
+    </div>
 
-{% for session in item.sessions %}
+    {% if course_sessions %}
 
-<li class="list-group-item d-flex justify-content-between align-items-center">
+        {% for item in course_sessions %}
 
-<div>
-<strong>{{ session.title }}</strong><br>
-{{ session.scheduled_date }} | {{ session.start_time }}
-</div>
+        <!-- COURSE CARD -->
+        <div class="card">
 
-<div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="course-title">{{ item.course.title }}</div>
 
-<div class="btn-group">
+                <a href="{% url 'manage_course' item.course.id %}" class="btn btn-secondary">
+                    ⚙️ Manage
+                </a>
+            </div>
 
-<button onclick="toggleSession('{{ session.id }}','start')" class="btn btn-success">
-Start Live
-</button>
+            <hr>
 
-<button onclick="toggleSession('{{ session.id }}','end')" class="btn btn-danger">
-Stop Live
-</button>
+            <h4>📅 Sessions</h4>
 
-<a href="/teacher/live/{{ session.id }}/" class="btn btn-primary">
-Enter Classroom
-</a>
+            {% if item.sessions %}
 
-<a href="{% url 'attendance_report' session.id %}" class="btn btn-warning">
-Attendance
-</a>
+                {% for session in item.sessions %}
 
-</div>
+                <div class="session-box">
 
-</div>
+                    <!-- LEFT -->
+                    <div class="session-info">
+                        <strong>{{ session.title }}</strong><br>
+                        {{ session.scheduled_date }} | {{ session.start_time }}
+                    </div>
 
-</li>
+                    <!-- RIGHT BUTTONS -->
+                    <div>
 
-{% endfor %}
+                        <button onclick="toggleSession('{{ session.id }}','start')" class="btn btn-success">
+                            ▶ Start
+                        </button>
 
-{% else %}
+                        <button onclick="toggleSession('{{ session.id }}','end')" class="btn btn-danger">
+                            ⏹ Stop
+                        </button>
 
-<li class="list-group-item">
-No sessions created yet
-</li>
+                        <a href="/teacher/live/{{ session.id }}/" class="btn btn-primary">
+                            🎥 Enter
+                        </a>
 
-{% endif %}
+                        <a href="{% url 'attendance_report' session.id %}" class="btn btn-warning">
+                            📊 Attendance
+                        </a>
 
-</ul>
+                    </div>
 
-</div>
-</div>
+                </div>
 
-{% endfor %}
+                {% endfor %}
 
-{% else %}
+            {% else %}
 
-<p>No courses created yet.</p>
+                <p class="empty-text">No sessions created yet</p>
 
-{% endif %}
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="card">
+            <p class="empty-text">No courses created yet.</p>
+        </div>
+
+    {% endif %}
 
 </div>
 
@@ -116,7 +181,6 @@ function toggleSession(sessionId, action) {
     });
 }
 
-
 function getCookie(name) {
     let cookieValue = null;
 
@@ -134,42 +198,6 @@ function getCookie(name) {
     }
 
     return cookieValue;
-}
-
-function startSession(sessionId) {
-
-fetch(`/teacher/start-session/${sessionId}/`, {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-"X-CSRFToken": "{{ csrf_token }}"
-}
-})
-.then(response => response.json())
-.then(data => {
-if (data.success){
-alert("Session Started")
-location.reload()
-}
-})
-}
-
-function stopSession(sessionId) {
-
-fetch(`/teacher/stop-session/${sessionId}/`, {
-method: "POST",
-headers: {
-"Content-Type": "application/json",
-"X-CSRFToken": "{{ csrf_token }}"
-}
-})
-.then(response => response.json())
-.then(data => {
-if (data.success){
-alert("Session Stopped")
-location.reload()
-}
-})
 }
 </script>
 
