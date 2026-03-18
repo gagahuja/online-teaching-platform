@@ -3,29 +3,24 @@
 {% block content %}
 
 <style>
-.container {
-    width: 90%;
-    margin: auto;
-}
-
 .dashboard-title {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 /* COURSE CARD */
 .course-card {
     background: white;
-    border-radius: 14px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 25px;
     margin-bottom: 25px;
-    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-    transition: 0.2s;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transition: 0.3s;
 }
 
 .course-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
 }
 
 /* HEADER */
@@ -35,35 +30,53 @@
     align-items: center;
 }
 
-/* LIVE BADGE */
+/* BADGE */
 .live-badge {
-    background: red;
+    background: linear-gradient(45deg, red, orange);
     color: white;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 20px;
     font-size: 12px;
+    animation: blink 1s infinite;
 }
 
 /* SESSION */
 .session-box {
-    background: #f7f9fc;
-    padding: 12px;
+    background: #f8faff;
+    padding: 14px;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+/* BUTTONS */
 .btn {
     padding: 6px 12px;
     border-radius: 6px;
     text-decoration: none;
     font-size: 14px;
+    margin-left: 5px;
 }
 
 .btn-primary { background: #3498db; color: white; }
+.btn-purple { background: #8e44ad; color: white; }
 .btn-gray { background: #bdc3c7; color: white; }
+
+/* PROGRESS */
+.progress-bar {
+    background: #eee;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill {
+    width: 60%;
+    background: linear-gradient(90deg, #2ecc71, #27ae60);
+    padding: 6px;
+}
 
 /* EMPTY */
 .empty {
@@ -71,114 +84,97 @@
     font-style: italic;
 }
 
-.live-badge {
-    animation: blink 1s infinite;
-}
-
+/* BLINK */
 @keyframes blink {
-    50% { opacity: 0.5; }
+    50% { opacity: 0.6; }
 }
 </style>
+
 <div id="liveAlert" style="
     display:none;
     background:#e74c3c;
     color:white;
-    padding:10px;
+    padding:12px;
     border-radius:8px;
     margin-bottom:15px;
 ">
     🔴 Live Class Started! Join Now
 </div>
 
-<div class="container">
+<div class="dashboard-title">🎓 My Learning Dashboard</div>
 
-    <div class="dashboard-title">🎓 My Learning Dashboard</div>
+{% if enrollments %}
 
-    {% if enrollments %}
+    {% for enrollment in enrollments %}
 
-        {% for enrollment in enrollments %}
+    <div class="course-card">
 
-        <div class="course-card">
-            <div style="margin-top:10px;">
-                <button class="btn btn-primary" style="background:#16a085;">
-                    🤖 Ask Doubt (AI)
-                </button>
+        <!-- HEADER -->
+        <div class="course-header">
+            <h3>{{ enrollment.course.title }}</h3>
+            <span class="live-badge">LIVE</span>
+        </div>
+
+        <p>{{ enrollment.course.description }}</p>
+
+        <!-- PROGRESS -->
+        <p><strong>Progress:</strong> 60%</p>
+
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+
+        <p><strong>Classes Attended:</strong> 8 / 12</p>
+
+        <!-- AI BUTTON -->
+        <button class="btn btn-primary" style="background:#16a085;">
+            🤖 Ask Doubt
+        </button>
+
+        <hr>
+
+        <h4>📺 Live Classes</h4>
+
+        {% for session in enrollment.course.sessions.all %}
+
+        <div class="session-box">
+
+            <div>
+                <strong>{{ session.title }}</strong><br>
+                {{ session.scheduled_date }} | {{ session.start_time }}
             </div>
 
-            <!-- COURSE HEADER -->
-            <div class="course-header">
-                <h3>{{ enrollment.course.title }}</h3>
+            <div>
+                {% if session.is_live %}
+                    <a href="{% url 'live_class' session.id %}" class="btn btn-primary">
+                        🚀 Join
+                    </a>
 
-                <span class="live-badge">Active</span>
+                    <a href="{% url 'live_class' session.id %}" class="btn btn-purple">
+                        ▶ Continue
+                    </a>
+                {% else %}
+                    <span class="btn btn-gray">Not Live</span>
+                {% endif %}
             </div>
-
-            <p>{{ enrollment.course.description }}</p>
-
-            <!-- PROGRESS -->
-            <p><strong>Progress:</strong> 60%</p>
-
-            <div style="background:#eee; border-radius:10px; margin-bottom:15px;">
-                <div style="width:60%; background:#2ecc71; padding:6px; border-radius:10px;"></div>
-            </div>
-
-            <p><strong>Classes Attended:</strong> 8 / 12</p>
-
-            <hr>
-
-            <h4>📺 Live Classes</h4>
-
-            {% if enrollment.course.sessions.all %}
-
-                {% for session in enrollment.course.sessions.all %}
-
-                <div class="session-box">
-
-                    <div>
-                        <strong>{{ session.title }}</strong><br>
-                        {{ session.scheduled_date }} | {{ session.start_time }}
-                    </div>
-
-                    <div>
-                        {% if session.is_live %}
-
-                            <a href="{% url 'live_class' session.id %}" class="btn btn-primary">
-                                🚀 Join Live
-                            </a>
-
-                            <a href="{% url 'live_class' session.id %}" class="btn btn-primary" style="background:#8e44ad;">
-                                ▶ Continue
-                            </a>
-
-                        {% else %}
-
-                            <span class="btn btn-gray">Not Live</span>
-
-                        {% endif %}
-                    </div>
-
-                </div>
-
-                {% endfor %}
-
-            {% else %}
-
-                <p class="empty">No sessions yet</p>
-
-            {% endif %}
 
         </div>
 
+        {% empty %}
+            <p class="empty">No sessions yet</p>
         {% endfor %}
 
-    {% else %}
+    </div>
 
-        <div class="course-card">
-            <p class="empty">You are not enrolled in any course yet.</p>
-        </div>
+    {% endfor %}
 
-    {% endif %}
+{% else %}
 
-</div>
+    <div class="course-card">
+        <p class="empty">No courses enrolled</p>
+    </div>
+
+{% endif %}
 
 <script>
 setInterval(() => {
