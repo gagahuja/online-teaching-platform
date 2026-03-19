@@ -589,7 +589,7 @@ def add_session(request, course_id):
 
 
 @login_required
-def student_dashboard(request):
+def student_dashboard_v2(request):
 
     profile = request.user.studentprofile
 
