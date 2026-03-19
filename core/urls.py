@@ -24,7 +24,7 @@ def health(request):
     return HttpResponse("OK")
 
 urlpatterns = [
-   path('', views.student_dashboard, name='home'),
+   path('', views.home, name='home'),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
