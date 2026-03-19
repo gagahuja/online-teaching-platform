@@ -51,7 +51,12 @@ def home(request):
 # ===============================
 @login_required
 def student_dashboard_v2(request):
-    profile, _ = StudentProfile.objects.get_or_create(user=request.user)
+    profile, created = StudentProfile.objects.get_or_create(user=request.user)
+
+    # 🔥 FIX: ensure role always exists
+    if not profile.role:
+        profile.role = "student"
+        profile.save()
 
     if profile.role != 'student':
         return redirect('home')
