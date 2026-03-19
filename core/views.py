@@ -602,7 +602,7 @@ def student_dashboard(request):
         "enrollments": enrollments
     }
 
-    return render(request, "courses/student_dashboard.html", context)
+    return render(request, "courses/student_dashboard_v2.html", context)
 
 
 
