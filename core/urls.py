@@ -24,7 +24,7 @@ def health(request):
     return HttpResponse("OK")
 
 urlpatterns = [
-    path('', views.home, name='home'),
+   path('', views.student_dashboard_v2, name='home'),
     path('admin/', admin.site.urls),
     path('accounts/', include('django.contrib.auth.urls')),
     path('enroll/<int:course_id>/', views.enroll_course, name='enroll_course'),
@@ -33,7 +33,6 @@ urlpatterns = [
     path('toggle-module/<int:module_id>/',views.toggle_module_completion,name='toggle_module_completion'),
     path('course/<int:course_id>/', views.course_detail, name='course_detail'),
     path('certificate/<int:course_id>/',views.download_certificate,name='download_certificate'),
-    path('', include('courses.urls')),
     path('teacher/dashboard/', views.teacher_dashboard, name='teacher_dashboard'),
     path('teacher/course/create/', views.create_course, name='create_course'),
     path('teacher/course/<int:course_id>/module/add/',views.add_module,name='add_module'),
@@ -43,13 +42,14 @@ urlpatterns = [
     path('course/<int:course_id>/module/add/', views.add_module, name='add_module'),
     path('course/<int:course_id>/manage/',views.manage_course,name='manage_course'),
     path('course/<int:course_id>/session/add/',views.add_session,name='add_session'),
-    path('student/dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('student/dashboard/', views.student_dashboard_v2, name='student_dashboard'),
     path('teacher/live/<int:session_id>/',views.teacher_live_panel,name='teacher_live_panel'),
     path('teacher/session/<int:session_id>/toggle/', views.toggle_session_status, name='toggle_session_status'),
     path("teacher/start-session/<int:session_id>/", views.start_session, name="start_session"),
     path("teacher/stop-session/<int:session_id>/", views.stop_session, name="stop_session"),
     path('teacher/attendance/<int:session_id>/', views.attendance_report, name='attendance_report'),
     path('health/', health),
+    path('', include('courses.urls')),
 ]
 
 
