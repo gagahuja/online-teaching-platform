@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'courses.apps.CoursesConfig',
-    'channels',
+    #'channels',
 ]
 
 MIDDLEWARE = [
@@ -174,14 +174,14 @@ DJANGO_SUPERUSER_EMAIL = os.environ.get("DJANGO_SUPERUSER_EMAIL")
 DJANGO_SUPERUSER_PASSWORD = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
 
 
-ASGI_APPLICATION = 'core.asgi.application'
+# ASGI_APPLICATION = 'core.asgi.application'
 
 import os
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
+# CHANNEL_LAYERS = {
+#    "default": {
+#        "BACKEND": "channels.layers.InMemoryChannelLayer"
+#    }
+#}
 
 
