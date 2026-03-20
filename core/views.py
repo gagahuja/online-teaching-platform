@@ -1,30 +1,18 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from courses.models import Enrollment
+from django.shortcuts import render
+from django.http import HttpResponse
 
 
 def home(request):
-    return render(request, "courses/home.html")
+    return HttpResponse("Website is working ✅")
 
 
-@login_required
 def student_dashboard_v2(request):
-    try:
-        profile = request.user.studentprofile
-        enrollments = Enrollment.objects.filter(student=profile)
-    except:
-        enrollments = []
-
-    return render(request, "courses/student_dashboard_v2.html", {
-        "enrollments": enrollments
-    })
+    return HttpResponse("Student Dashboard Working ✅")
 
 
-@login_required
 def teacher_dashboard(request):
-    return render(request, "courses/teacher_dashboard.html")
+    return HttpResponse("Teacher Dashboard Working ✅")
 
 
-# SAFE PLACEHOLDER (so errors never happen)
 def course_attendance(request, course_id):
-    return render(request, "courses/home.html")
+    return HttpResponse("Attendance Page ✅")
