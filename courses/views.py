@@ -122,3 +122,9 @@ def leave_class(request):
             return JsonResponse({"error": str(e)})
 
     return JsonResponse({"error": "Invalid request"})
+
+
+from django.shortcuts import render
+
+def home(request):
+    return render(request, "courses/home.html")
