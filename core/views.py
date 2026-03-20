@@ -4,24 +4,16 @@ from courses.models import Enrollment
 
 
 def home(request):
-    if request.user.is_authenticated:
-        try:
-            profile = request.user.studentprofile
-
-            if profile.role == "teacher":
-                return redirect("teacher_dashboard")
-            else:
-                return redirect("student_dashboard")
-
-        except:
-            return redirect("student_dashboard")
-
     return render(request, "courses/home.html")
 
 
 @login_required
 def student_dashboard_v2(request):
-    enrollments = Enrollment.objects.filter(student=request.user.studentprofile)
+    try:
+        profile = request.user.studentprofile
+        enrollments = Enrollment.objects.filter(student=profile)
+    except:
+        enrollments = []
 
     return render(request, "courses/student_dashboard_v2.html", {
         "enrollments": enrollments
