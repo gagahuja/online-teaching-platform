@@ -22,28 +22,25 @@ import json
 # ===============================
 @login_required
 def home(request):
-    profile, _ = StudentProfile.objects.get_or_create(user=request.user)
+    try:
+        profile, _ = StudentProfile.objects.get_or_create(user=request.user)
 
-    if profile.role == "teacher":
-        return teacher_dashboard(request)
+        # Ensure role exists
+        if not profile.role:
+            profile.role = "student"
+            profile.save()
 
-    enrollments = Enrollment.objects.filter(student=profile)
+        if profile.role == "teacher":
+            return teacher_dashboard(request)
 
-    course_sessions = []
-    for enrollment in enrollments:
-        sessions = ClassSession.objects.filter(
-            course=enrollment.course,
-            is_active=True
-        )
+        enrollments = Enrollment.objects.filter(student=profile)
 
-        course_sessions.append({
-            "course": enrollment.course,
-            "sessions": sessions
+        return render(request, "courses/home.html", {
+            "enrollments": enrollments
         })
 
-    return render(request, "courses/home.html", {
-        "course_sessions": course_sessions
-    })
+    except Exception as e:
+        return HttpResponse(f"Error: {str(e)}")
 
 
 # ===============================
